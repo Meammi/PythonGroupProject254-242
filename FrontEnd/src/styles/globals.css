@@ -6,47 +6,58 @@
 
 @layer base {
   :root {
-    /* Brand Colors จาก Design System */
-    --color-primary: #9E1B32;    /* Deep Red */
-    --color-secondary: #C5A059;  /* Gold/Bronze */
-    --color-tertiary: #005C53;   /* Deep Teal */
-    --color-neutral: #867273;    /* Grayish Brown */
-    
-    /* Surface & Background */
-    --color-background: #FDF2F2; /* Background */
-    --color-surface: #FFFFFF;    /* พื้นหลัง Card/Panel */
-    --color-border: #F3E8E8;     /* สีเส้นขอบ */
-    
-    /* Text Colors */
-    --color-text: #1F1F1F;       /* สีตัวอักษรหลัก */
-    --color-text-muted: #867273; /* สีตัวอักษรรอง */
+    /* Brand Colors (จากรูป Design System) */
+    --color-tu-red: #9E1B32;
+    --color-tu-gold: #C5A059;
+    --color-tu-teal: #005C53;
 
-    /* Layout & Effects */
-    --radius: 16px;              /* ความมน */
+    /* Disco Spectrum (โทนสีสนุกๆ สำหรับ TULóng) */
+    --color-disco-yellow: #FACC15;
+    --color-disco-orange: #FF6B35;
+    --color-disco-purple: #8338EC;
+    --color-disco-blue: #3A86FF;
+    --color-disco-green: #06D6A0;
+
+    /* Base UI Colors */
+    --color-background: #FDF2F2;
+    --color-surface: #FFFFFF;
+    --color-text: #171717;
+    --color-text-muted: #867273;
+    --color-border: #E5E5E5;
+
+    --radius: 16px;
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+}
 
-  body {
-    @apply bg-[var(--color-background)] text-[var(--color-text)];
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+body {
+  @apply bg-[var(--color-background)] text-[var(--color-text)];
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  /* ตั้งค่าพื้นฐานสำหรับ Card เพื่อให้ประหยัดเวลาเขียน Utility */
-  .glass-card {
-    @apply bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm;
-    border-radius: var(--radius);
-  }
+/* ตั้งค่าพื้นฐานสำหรับ Card เพื่อให้ประหยัดเวลาเขียน Utility */
+.glass-card {
+  @apply bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm;
+  border-radius: var(--radius);
 }
 
 @layer utilities {
   .transition-smooth {
     transition: var(--transition-smooth);
   }
-  
-  /* เพิ่ม Utility สำหรับสีใหม่เพื่อให้เรียกใช้ได้ผ่าน Tailwind */
-  .text-primary { color: var(--color-primary); }
-  .bg-primary { background-color: var(--color-primary); }
-  .border-primary { border-color: var(--color-primary); }
+
+  /* Fix: Use the new --color-tu-red variable since --color-primary was deleted */
+  .text-primary {
+    color: var(--color-tu-red);
+  }
+
+  .bg-primary {
+    background-color: var(--color-tu-red);
+  }
+
+  .border-primary {
+    border-color: var(--color-tu-red);
+  }
 }

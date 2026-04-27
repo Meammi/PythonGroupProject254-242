@@ -1,28 +1,8 @@
 import React, { useState } from 'react';
-import Sidebar from './components/Sidebar/Sidebar';
+import MainLayout from './components/MainLayout';
+import MapPage from './pages/MapPage';
 
-// --- Page Components ---
-
-const MapPage = () => (
-  <div className="w-full h-full bg-surface rounded-[16px] border border-border shadow-sm flex flex-col items-center justify-center overflow-hidden relative group">
-    {/* Immersive Map Placeholder Background using custom variables */}
-    <div 
-      className="absolute inset-0 opacity-10 transition-smooth group-hover:opacity-20" 
-      style={{ 
-        backgroundImage: 'radial-gradient(var(--color-primary) 1.5px, transparent 1.5px)', 
-        backgroundSize: '32px 32px' 
-      }}
-    ></div>
-    
-    <div className="z-10 flex flex-col items-center p-8 bg-surface/80 backdrop-blur-md rounded-[16px] border border-border shadow-sm">
-      <h2 className="text-3xl font-bold text-primary mb-2 text-center">Interactive Campus Map</h2>
-      <p className="text-text-muted text-center max-w-md">
-        This immersive full-screen container is ready for your Google Maps integration.
-      </p>
-    </div>
-  </div>
-);
-
+// Simple mock pages for other routes (to keep App.jsx clean without deleting features)
 const InsightsPage = () => (
   <div className="p-8 max-w-6xl mx-auto w-full">
     <h2 className="text-3xl font-bold text-text mb-2">Culture Insights</h2>
@@ -69,8 +49,6 @@ const SettingsPage = () => (
   </div>
 );
 
-// --- Main Application ---
-
 function App() {
   const [activePage, setActivePage] = useState('map'); // Default page is Map
 
@@ -86,21 +64,9 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-full bg-background flex font-sans text-text overflow-hidden transition-smooth">
-      <Sidebar 
-        activePage={activePage}
-        setActivePage={setActivePage}
-      />
-      
-      {/* Main Layout Area - Margin left stays 20 so sidebar overlays smoothly on hover */}
-      <main 
-        className="flex-1 h-screen transition-smooth flex flex-col ml-20"
-      >
-        <div className={`flex-1 flex w-full h-full ${activePage === 'map' ? 'p-3 md:p-5' : 'overflow-y-auto'}`}>
-          {renderContent()}
-        </div>
-      </main>
-    </div>
+    <MainLayout activePage={activePage} setActivePage={setActivePage}>
+      {renderContent()}
+    </MainLayout>
   );
 }
 
