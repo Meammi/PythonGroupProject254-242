@@ -3,15 +3,14 @@ import { User, Landmark } from 'lucide-react';
 import { navigationItems } from '../data/navigation';
 import TULongLogo from './TULongLogo';
 
-const Sidebar = ({ activePage, setActivePage }) => {
-  const [isHovered, setIsHovered] = useState(false);
+const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
   const isCollapsed = !isHovered;
 
   return (
     <aside 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`fixed top-0 left-0 h-screen bg-surface border-r border-border transition-smooth z-30 flex flex-col shadow-sm ${isCollapsed ? 'w-20' : 'w-64'}`}
+      className={`fixed top-0 left-0 h-screen bg-surface border-r border-border transition-smooth z-40 flex flex-col shadow-sm ${isCollapsed ? 'w-20' : 'w-64'}`}
     >
       
       {/* Top Logo */}

@@ -20,18 +20,9 @@ export default {
           muted: "var(--color-text-muted)",
         },
 
-        // Explicit mapping for tu-red as requested
+        // Explicit mapping for branding
         "tu-red": "var(--color-tu-red)",
-
-        // กลุ่มสี Disco สำหรับแบรนด์ TULóng (ใช้ var ทั้งหมด)
-        disco: {
-          red: "var(--color-tu-red)",
-          yellow: "var(--color-disco-yellow)",
-          orange: "var(--color-disco-orange)",
-          purple: "var(--color-disco-purple)",
-          blue: "var(--color-disco-blue)",
-          green: "var(--color-disco-green)",
-        },
+        "tu-gold": "var(--color-tu-gold)",
       },
       borderRadius: {
         DEFAULT: "var(--radius)",
