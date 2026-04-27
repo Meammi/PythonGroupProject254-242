@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand Colors จาก Design System */
+    --color-primary: #9E1B32;    /* Deep Red */
+    --color-secondary: #C5A059;  /* Gold/Bronze */
+    --color-tertiary: #005C53;   /* Deep Teal */
+    --color-neutral: #867273;    /* Grayish Brown */
+    
+    /* Surface & Background */
+    --color-background: #FDF2F2; /* Background */
+    --color-surface: #FFFFFF;    /* พื้นหลัง Card/Panel */
+    --color-border: #F3E8E8;     /* สีเส้นขอบ */
+    
+    /* Text Colors */
+    --color-text: #1F1F1F;       /* สีตัวอักษรหลัก */
+    --color-text-muted: #867273; /* สีตัวอักษรรอง */
+
+    /* Layout & Effects */
+    --radius: 16px;              /* ความมน */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    @apply bg-[var(--color-background)] text-[var(--color-text)];
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ตั้งค่าพื้นฐานสำหรับ Card เพื่อให้ประหยัดเวลาเขียน Utility */
+  .glass-card {
+    @apply bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm;
+    border-radius: var(--radius);
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  /* เพิ่ม Utility สำหรับสีใหม่เพื่อให้เรียกใช้ได้ผ่าน Tailwind */
+  .text-primary { color: var(--color-primary); }
+  .bg-primary { background-color: var(--color-primary); }
+  .border-primary { border-color: var(--color-primary); }
+}
