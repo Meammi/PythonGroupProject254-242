@@ -1,22 +1,62 @@
-from datetime import datetime
-from uuid import UUID
-from uuid import uuid4
+from __future__ import annotations
 
-from sqlalchemy import DateTime, String, func
-from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from datetime import datetime
+from typing import Optional
+
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.index import Base
 
 
-class User(Base):
-    __tablename__ = "users"
+class Building(Base):
+    __tablename__ = "buildings"
 
-    id: Mapped[UUID] = mapped_column(PostgresUUID(as_uuid=True), primary_key=True, default=uuid4)
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    full_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    code: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    latitude: Mapped[Optional[float]] = mapped_column(Float)
+    longitude: Mapped[Optional[float]] = mapped_column(Float)
+    description: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(timezone=False),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+
+class Floor(Base):
+    __tablename__ = "floors"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    building_id: Mapped[int] = mapped_column(ForeignKey("buildings.id"), nullable=False)
+    floor_code: Mapped[str] = mapped_column(String(100), nullable=False)
+    floor_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    sort_order: Mapped[Optional[int]] = mapped_column(Integer)
+
+
+class FacilityType(Base):
+    __tablename__ = "facility_types"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    icon: Mapped[Optional[str]] = mapped_column(String(255))
+
+
+class Facility(Base):
+    __tablename__ = "facilities"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    building_id: Mapped[int] = mapped_column(ForeignKey("buildings.id"), nullable=False)
+    floor_id: Mapped[int] = mapped_column(ForeignKey("floors.id"), nullable=False)
+    facility_type_id: Mapped[int] = mapped_column(ForeignKey("facility_types.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    latitude: Mapped[Optional[float]] = mapped_column(Float)
+    longitude: Mapped[Optional[float]] = mapped_column(Float)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="true", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False),
         server_default=func.now(),
         nullable=False,
     )
