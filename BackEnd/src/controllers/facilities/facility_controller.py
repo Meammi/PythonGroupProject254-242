@@ -26,7 +26,7 @@ async def get_facility_by_id(facility_id: int, db: AsyncSession) -> dict:
         .join(Floor, Facility.floor_id == Floor.id)
         .join(FacilityType, Facility.facility_type_id == FacilityType.id)
         .where(Facility.id == facility_id)
-        .where(Facility.is_active == True)
+        .where(Facility.is_active)
     )
     row = result.first()
 
@@ -68,7 +68,7 @@ async def update_facility(facility_id: int, body: UpdateFacilityRequest, db: Asy
     result = await db.execute(
         select(Facility)
         .where(Facility.id == facility_id)
-        .where(Facility.is_active == True)
+        .where(Facility.is_active)
     )
     facility = result.scalars().first()
 
@@ -85,7 +85,7 @@ async def delete_facility(facility_id: int, db: AsyncSession) -> dict:
     result = await db.execute(
         select(Facility)
         .where(Facility.id == facility_id)
-        .where(Facility.is_active == True)
+        .where(Facility.is_active)
     )
     facility = result.scalars().first()
 
