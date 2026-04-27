@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.db.index import Base
@@ -60,3 +60,23 @@ class Facility(Base):
         server_default=func.now(),
         nullable=False,
     )
+
+class Temperature(Base):
+    __tablename__ = "temperatures"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    building_id: Mapped[int] = mapped_column(ForeignKey("buildings.id"), nullable=False, index=True)
+    floor_id: Mapped[int] = mapped_column(ForeignKey("floors.id"), nullable=False)
+    facility_id: Mapped[int] = mapped_column(ForeignKey("facilities.id"), nullable=False)
+    temperature: Mapped[float] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    __table_args__ = (
+        UniqueConstraint("building_id", "floor_id", "facility_id", name="uq_temperature_location"),
+    )
+
