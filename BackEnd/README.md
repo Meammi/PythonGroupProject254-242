@@ -34,6 +34,21 @@ uvicorn src.index:app --reload
 
 Open `http://127.0.0.1:8000/docs`.
 
+## Docker Compose
+
+Run the database and backend together:
+
+```bash
+docker compose up --build
+```
+
+This starts:
+
+- `postgres` on `127.0.0.1:5432`
+- `backend` on `127.0.0.1:8000`
+
+Inside Docker, the backend connects to PostgreSQL with host `postgres`.
+
 ## Structure
 
 - `src/controllers`: request handlers and request/response schemas.
