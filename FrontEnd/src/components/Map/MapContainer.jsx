@@ -10,7 +10,6 @@ const MapContainer = ({ setMapInstance }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Lazy Load Protection: Only initialize once
     if (map.current) return; 
 
     if (!awsConfig.region || !awsConfig.mapName || !awsConfig.apiKey) {
@@ -21,7 +20,6 @@ const MapContainer = ({ setMapInstance }) => {
 
     const styleUrl = `https://maps.geo.${awsConfig.region}.amazonaws.com/maps/v0/maps/${awsConfig.mapName}/style-descriptor?key=${awsConfig.apiKey}`;
 
-    // Optimization: Only intercept and transform AWS endpoint requests to append the key
     const transformRequest = (url, resourceType) => {
       if (url.includes('amazonaws.com') && !url.includes('key=')) {
         return {
@@ -38,30 +36,29 @@ const MapContainer = ({ setMapInstance }) => {
       zoom: MAP_CONFIG.defaultZoom,
       minZoom: MAP_CONFIG.minZoom,
       maxZoom: MAP_CONFIG.maxZoom,
-      attributionControl: false, // Aesthetic UI: disable default attribution
+      attributionControl: false,
       transformRequest: transformRequest,
-      maxTileCacheSize: MAP_CONFIG.maxTileCacheSize, // Cache Optimization
+      maxTileCacheSize: MAP_CONFIG.maxTileCacheSize,
     });
-
-    // Aesthetic UI: We explicitly do NOT add NavigationControl() 
-    // This removes the bulky default +/- zoom buttons.
-    // Scroll-zoom and pinch-to-zoom remain active natively by default.
-
-    // User Location (The Blue Dot) Configuration
-    const geolocateControl = new maplibregl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true
-      },
-      trackUserLocation: true,
-      showUserHeading: true,
-      showUserLocation: true
-    });
-    
-    map.current.addControl(geolocateControl, 'bottom-right');
 
     map.current.on('load', () => {
       setIsLoading(false);
       setMapInstance(map.current);
+
+      // --- Minimalist Map Cleaning ---
+      // Remove POIs, business icons, and cluttering place labels
+      const style = map.current.getStyle();
+      if (style && style.layers) {
+        style.layers.forEach((layer) => {
+          if (
+            layer.id.includes('poi') ||
+            layer.id.includes('place-label') ||
+            layer.id.includes('transit-label')
+          ) {
+            map.current.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        });
+      }
     });
 
     return () => {
@@ -74,11 +71,10 @@ const MapContainer = ({ setMapInstance }) => {
 
   return (
     <div className="relative w-full h-full">
-      {/* Loading State / Skeleton Optimization */}
       {isLoading && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-surface/90 backdrop-blur-md transition-smooth">
           <div className="w-12 h-12 border-4 border-border border-t-tu-gold rounded-full animate-spin mb-4"></div>
-          <span className="text-tu-red font-bold animate-pulse text-lg">Loading TU Map...</span>
+          <span className="text-tu-red font-bold animate-pulse text-lg font-sans">Loading TU Map...</span>
         </div>
       )}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full bg-background" />

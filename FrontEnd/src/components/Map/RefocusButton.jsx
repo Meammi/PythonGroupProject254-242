@@ -13,23 +13,31 @@ const RefocusButton = ({ mapInstance }) => {
           mapInstance.flyTo({
             center: [position.coords.longitude, position.coords.latitude],
             zoom: MAP_CONFIG.defaultZoom,
-            essential: true
+            essential: true,
+            duration: 1200
           });
         },
         (error) => {
           console.warn("Geolocation denied or error:", error);
+          // Fallback center if they block geolocation mid-session
           mapInstance.flyTo({
             center: MAP_CONFIG.defaultCenter,
             zoom: MAP_CONFIG.defaultZoom,
-            essential: true
+            essential: true,
+            duration: 1200
           });
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 5000
         }
       );
     } else {
       mapInstance.flyTo({
         center: MAP_CONFIG.defaultCenter,
         zoom: MAP_CONFIG.defaultZoom,
-        essential: true
+        essential: true,
+        duration: 1200
       });
     }
   };
@@ -37,7 +45,7 @@ const RefocusButton = ({ mapInstance }) => {
   return (
     <button 
       onClick={handleRefocus}
-      className="absolute bottom-10 right-10 z-20 bg-surface/80 backdrop-blur-md p-3 rounded-xl border border-border shadow-sm text-text-muted hover:text-tu-red hover:border-tu-red transition-smooth outline-none group"
+      className="absolute bottom-10 right-10 z-20 bg-surface/80 backdrop-blur-md p-3 rounded-xl border border-border shadow-sm text-text-muted hover:text-tu-gold hover:border-tu-gold transition-smooth outline-none group"
       title="My Location"
     >
       <LocateFixed size={24} className="group-hover:scale-110 transition-smooth" />

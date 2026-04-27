@@ -4,6 +4,13 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'text-tu-red',
+    'text-tu-gold',
+    'text-black',
+    'text-tu-orange',
+    'bg-tu-orange'
+  ],
   theme: {
     extend: {
       colors: {
@@ -23,6 +30,7 @@ export default {
         // Explicit mapping for branding
         "tu-red": "var(--color-tu-red)",
         "tu-gold": "var(--color-tu-gold)",
+        "tu-orange": "var(--color-tu-orange)",
       },
       borderRadius: {
         DEFAULT: "var(--radius)",

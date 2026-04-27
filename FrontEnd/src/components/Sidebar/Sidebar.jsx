@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Map, Activity, Heart, Settings, User, Landmark } from 'lucide-react';
+import { APP_BRANDING } from '../../data/constants';
 
 const Sidebar = ({ activePage, setActivePage }) => {
   // Mock login state for demonstration (Clicking the profile toggles this!)
@@ -31,7 +32,11 @@ const Sidebar = ({ activePage, setActivePage }) => {
         </div>
         {!isCollapsed && (
           <div className="flex flex-col overflow-hidden whitespace-nowrap">
-            <span className="font-bold text-primary text-lg leading-tight tracking-tight">TU Discovery</span>
+            <div className="font-bold text-lg leading-tight tracking-tight flex items-center">
+              <span className={APP_BRANDING.tu.colorClass}>{APP_BRANDING.tu.text}</span>
+              <span className={`${APP_BRANDING.dot.colorClass} mx-1.5`}>{APP_BRANDING.dot.text}</span>
+              <span className={APP_BRANDING.long.colorClass}>{APP_BRANDING.long.text}</span>
+            </div>
             <span className="text-text-muted text-[10px] tracking-wide uppercase font-medium">Campus Navigator</span>
           </div>
         )}

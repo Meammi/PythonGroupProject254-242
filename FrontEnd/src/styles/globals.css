@@ -8,8 +8,9 @@
   :root {
     /* Brand Colors (จากรูป Design System) */
     --color-tu-red: #9E1B32;
-    --color-tu-gold: #C5A059;
+    --color-tu-gold: #C5A059; 
     --color-tu-teal: #005C53;
+    --color-tu-orange: #e99c39;
 
     /* Base UI Colors */
     --color-background: #FDF2F2;
