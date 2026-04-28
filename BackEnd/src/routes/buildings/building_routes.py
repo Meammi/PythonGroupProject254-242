@@ -28,3 +28,25 @@ router.add_api_route(
     methods=["GET"],
     response_model=building_controller.FacilitiesResponse,
 )
+
+# ── CRUD endpoints ───────────────────────────────────────────────────────────
+
+router.add_api_route(
+    "/buildings",
+    building_controller.create_building,
+    methods=["POST"],
+    status_code=201,
+    response_model=building_controller.BuildingCreateOut,
+)
+router.add_api_route(
+    "/buildings/{building_id}",
+    building_controller.update_building,
+    methods=["PUT"],
+    response_model=building_controller.MessageOut,
+)
+router.add_api_route(
+    "/buildings/{building_id}",
+    building_controller.delete_building,
+    methods=["DELETE"],
+    response_model=building_controller.MessageOut,
+)

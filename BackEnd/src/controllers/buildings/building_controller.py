@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from fastapi import Depends, HTTPException, Query
@@ -5,8 +6,19 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.index import get_db_session
+from src.schemas.building import (
+    BuildingCreateOut,
+    BuildingOut,
+    CreateBuildingRequest,
+    MessageOut,
+    UpdateBuildingRequest,
+)
 from src.services.buildings import building_service
 
+logger = logging.getLogger(__name__)
+
+
+# ── Response wrappers (match existing project pattern) ───────────────────────
 
 class BuildingResponse(BaseModel):
     id: int
@@ -46,6 +58,8 @@ class FacilityResponse(BaseModel):
 class FacilitiesResponse(BaseModel):
     data: list[FacilityResponse]
 
+
+# ── GET controllers (existing) ───────────────────────────────────────────────
 
 async def get_buildings(db: AsyncSession = Depends(get_db_session)) -> BuildingsResponse:
     buildings = await building_service.get_all_buildings(db)
@@ -126,3 +140,56 @@ async def get_building_facilities(
             for facility in facilities
         ]
     )
+
+
+# ── POST / PUT / DELETE controllers (new) ────────────────────────────────────
+
+async def create_building(
+    body: CreateBuildingRequest,
+    db: AsyncSession = Depends(get_db_session),
+) -> BuildingCreateOut:
+    """Create a new building entry."""
+    try:
+        new_building = await building_service.create_building(db, body)
+    except Exception as exc:
+        logger.error("Failed to create building: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return BuildingCreateOut(id=new_building.id, message="created")
+
+
+async def update_building(
+    building_id: int,
+    body: UpdateBuildingRequest,
+    db: AsyncSession = Depends(get_db_session),
+) -> MessageOut:
+    """Update an existing building (partial update)."""
+    building = await building_service.get_building_by_id(db, building_id)
+    if building is None:
+        raise HTTPException(status_code=404, detail="Building not found")
+
+    try:
+        await building_service.update_building(db, building, body)
+    except Exception as exc:
+        logger.error("Failed to update building id=%s: %s", building_id, exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return MessageOut(message="updated")
+
+
+async def delete_building(
+    building_id: int,
+    db: AsyncSession = Depends(get_db_session),
+) -> MessageOut:
+    """Delete a building by its ID (hard delete)."""
+    building = await building_service.get_building_by_id(db, building_id)
+    if building is None:
+        raise HTTPException(status_code=404, detail="Building not found")
+
+    try:
+        await building_service.delete_building(db, building)
+    except Exception as exc:
+        logger.error("Failed to delete building id=%s: %s", building_id, exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return MessageOut(message="deleted")

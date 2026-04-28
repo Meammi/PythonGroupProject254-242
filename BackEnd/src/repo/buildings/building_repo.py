@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 from sqlalchemy import select
@@ -5,6 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.schema.index import Building, Facility, FacilityType, Floor
 
+logger = logging.getLogger(__name__)
+
+
+# ── Read ─────────────────────────────────────────────────────────────────────
 
 async def get_all_buildings(db: AsyncSession) -> list[Building]:
     result = await db.execute(select(Building).order_by(Building.id))
@@ -47,3 +52,36 @@ async def get_facilities_by_building_id(
 
     result = await db.execute(query)
     return list(result.scalars().all())
+
+
+# ── Create ───────────────────────────────────────────────────────────────────
+
+async def create_building(db: AsyncSession, building: Building) -> Building:
+    db.add(building)
+    await db.commit()
+    await db.refresh(building)
+    logger.info("Created building id=%s code=%s", building.id, building.code)
+    return building
+
+
+# ── Update ───────────────────────────────────────────────────────────────────
+
+async def update_building(
+    db: AsyncSession,
+    building: Building,
+    update_data: dict,
+) -> Building:
+    for key, value in update_data.items():
+        setattr(building, key, value)
+    await db.commit()
+    await db.refresh(building)
+    logger.info("Updated building id=%s", building.id)
+    return building
+
+
+# ── Delete ───────────────────────────────────────────────────────────────────
+
+async def delete_building(db: AsyncSession, building: Building) -> None:
+    await db.delete(building)
+    await db.commit()
+    logger.info("Deleted building id=%s", building.id)
