@@ -37,7 +37,7 @@ TRUNCATE TABLE buildings     RESTART IDENTITY CASCADE;
 
 INSERT INTO buildings (id, code, name, latitude, longitude, description)
 VALUES
-    (1, 'SC1', 'Social Sciences Building 1', 14.071580, 100.604750,
+    (1, 'SC1', 'Social Sciences Building 1', 14.069254, 100.603439,
      'A four-storey academic building in the Faculty of Social Sciences at Thammasat University, Rangsit Campus. Houses classrooms, faculty offices, and student service areas.');
 
 
