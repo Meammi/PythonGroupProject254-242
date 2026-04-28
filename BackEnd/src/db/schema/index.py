@@ -79,4 +79,4 @@ class Temperature(Base):
     __table_args__ = (
         UniqueConstraint("building_id", "floor_id", "facility_id", name="uq_temperature_location"),
     )
-
+
