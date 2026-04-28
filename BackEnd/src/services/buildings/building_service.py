@@ -29,7 +29,7 @@ async def get_facilities_by_building_id(
     building_id: int,
     floor_code: Optional[str] = None,
     facility_types: Optional[list[str]] = None,
-) -> list[Facility]:
+) -> list[tuple]:
     return await building_repo.get_facilities_by_building_id(
         db,
         building_id,
