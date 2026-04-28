@@ -55,3 +55,55 @@ body {
     border-color: var(--color-tu-red);
   }
 }
+
+/* ── Building Marker Styles ──────────────────────────────────────────────── */
+
+.building-marker-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.building-marker-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-tu-red);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(158, 27, 50, 0.35);
+  transition: var(--transition-smooth);
+}
+
+.building-marker-wrapper:hover .building-marker-icon {
+  transform: scale(1.10);
+  box-shadow: 0 4px 16px rgba(158, 27, 50, 0.50);
+}
+
+.building-marker-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.92);
+  white-space: nowrap;
+  padding: 6px 12px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: calc(var(--radius) * 0.5);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--transition-smooth);
+}
+
+.building-marker-wrapper:hover .building-marker-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}

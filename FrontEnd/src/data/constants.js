@@ -1,3 +1,8 @@
+// ── API ─────────────────────────────────────────────────────────────────────
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+
+// ── Branding ────────────────────────────────────────────────────────────────
 export const APP_BRANDING = {
   tu: { text: "TU", colorClass: "text-tu-red" },
   dot: { text: "•", colorClass: "text-black" },

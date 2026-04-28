@@ -3,6 +3,7 @@ import MapContainer from '../components/Map/MapContainer';
 import SearchBar from '../components/Map/SearchBar';
 import RefocusButton from '../components/Map/RefocusButton';
 import CurrentLocationDot from '../components/Map/CurrentLocationDot';
+import BuildingMarkers from '../components/Map/BuildingMarkers';
 
 const MapPage = ({ isSidebarExpanded }) => {
   const [mapInstance, setMapInstance] = useState(null);
@@ -13,8 +14,10 @@ const MapPage = ({ isSidebarExpanded }) => {
       <SearchBar isSidebarExpanded={isSidebarExpanded} />
       <RefocusButton mapInstance={mapInstance} />
       <CurrentLocationDot mapInstance={mapInstance} />
+      <BuildingMarkers mapInstance={mapInstance} />
     </div>
   );
 };
 
 export default MapPage;
+
