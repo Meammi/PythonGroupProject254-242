@@ -49,12 +49,18 @@ class FloorsResponse(BaseModel):
     data: list[FloorResponse]
 
 
+class FacilityTypeResponse(BaseModel):
+    name: str
+    icon: str
+
+
 class FacilityResponse(BaseModel):
     id: int
     name: str
     lat: Optional[float]
     lng: Optional[float]
     floor: str
+    type: FacilityTypeResponse
 
 
 class FacilitiesResponse(BaseModel):
@@ -140,8 +146,9 @@ async def get_building_facilities(
                 lat=facility.latitude,
                 lng=facility.longitude,
                 floor=fcode,
+                type=FacilityTypeResponse(name=type_name, icon=type_icon),
             )
-            for facility, fcode in rows
+            for facility, fcode, type_name, type_icon in rows
         ]
     )
 
