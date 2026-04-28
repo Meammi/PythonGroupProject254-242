@@ -9,13 +9,14 @@ import { useBuildings } from '../../hooks/useBuildings';
  *
  * Each marker is a branded rounded-square with a Landmark icon,
  * and displays a tooltip with the building name on hover.
+ * Clicking a marker triggers onBuildingSelect with the building object.
  *
  * This component renders nothing in the React tree —
  * it injects DOM elements into the MapLibre canvas via markers.
  *
- * @param {{ mapInstance: maplibregl.Map | null }} props
+ * @param {{ mapInstance: maplibregl.Map | null, onBuildingSelect?: (building) => void }} props
  */
-const BuildingMarkers = ({ mapInstance }) => {
+const BuildingMarkers = ({ mapInstance, onBuildingSelect }) => {
   const markersRef = useRef([]);
   const { buildings, isLoading, error } = useBuildings();
 
@@ -49,6 +50,12 @@ const BuildingMarkers = ({ mapInstance }) => {
       el.appendChild(iconBox);
       el.appendChild(tooltip);
 
+      // ── Click handler → open detail card ─────────────────────────────
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onBuildingSelect?.(building);
+      });
+
       // ── Create MapLibre marker ──────────────────────────────────────
       const marker = new maplibregl.Marker({
         element: el,
@@ -65,7 +72,7 @@ const BuildingMarkers = ({ mapInstance }) => {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
     };
-  }, [mapInstance, buildings, isLoading, error]);
+  }, [mapInstance, buildings, isLoading, error, onBuildingSelect]);
 
   // This component handles DOM injection into MapLibre — renders nothing in React tree
   return null;
