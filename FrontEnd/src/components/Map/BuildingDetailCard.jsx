@@ -13,7 +13,7 @@ import buildingFallback from '../../assets/images/SC1.webp';
  *
  * @param {{ buildingId: number|null, onClose: () => void }} props
  */
-const BuildingDetailCard = ({ buildingId, onClose }) => {
+const BuildingDetailCard = ({ buildingId, onClose, onEnterBuilding }) => {
   const { building, isLoading, error } = useBuildingDetail(buildingId);
   const isVisible = buildingId != null;
 
@@ -130,7 +130,10 @@ const BuildingDetailCard = ({ buildingId, onClose }) => {
                       backgroundColor: 'var(--color-tu-red)',
                       borderRadius: 'var(--radius)',
                     }}
-                    onClick={() => {}}
+                    onClick={() => {
+                      onEnterBuilding?.(building);
+                      onClose();
+                    }}
                   >
                     <Building2 size={16} />
                     Inside the Building

@@ -12,6 +12,7 @@ export const APP_BRANDING = {
 export const MAP_CONFIG = {
   defaultCenter: [100.6087, 14.0722], // TU Rangsit Campus
   defaultZoom: 15,
+  insideBuildingZoom: 18.5,
   minZoom: 10,
   maxZoom: 20,
   maxTileCacheSize: 500, // Caching optimization limit
