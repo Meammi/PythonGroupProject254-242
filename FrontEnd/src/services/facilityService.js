@@ -29,3 +29,38 @@ export async function fetchFacilities(buildingId) {
 
   return response.json();
 }
+
+/**
+ * Fetches a single facility's full detail by ID.
+ * @param {number} facilityId
+ * @returns {Promise<{ id, name, lat, lng, description, is_active, floor, type, building_name, building_code }>}
+ */
+export async function fetchFacilityById(facilityId) {
+  const response = await fetch(`${API_BASE_URL}/facilities/${facilityId}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch facility ${facilityId} (HTTP ${response.status})`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetches the temperature reading for a specific facility.
+ * @param {number} facilityId
+ * @returns {Promise<{ temperature: number, ... } | null>}
+ */
+export async function fetchFacilityTemperature(facilityId) {
+  const response = await fetch(`${API_BASE_URL}/temperatures/facility/${facilityId}`);
+
+  if (response.status === 404) {
+    return null; // No temperature data available
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch temperature (HTTP ${response.status})`);
+  }
+
+  return response.json();
+}
+

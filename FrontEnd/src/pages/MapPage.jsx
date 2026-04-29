@@ -1,15 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import MapContainer from '../components/Map/MapContainer';
 import SearchBar from '../components/Map/SearchBar';
-import RefocusButton from '../components/Map/RefocusButton';
-import CurrentLocationDot from '../components/Map/CurrentLocationDot';
 import BuildingMarkers from '../components/Map/BuildingMarkers';
 import BuildingDetailCard from '../components/Map/BuildingDetailCard';
+import FacilityDetailCard from '../components/Map/FacilityDetailCard';
 import FacilityMarkers from '../components/Map/FacilityMarkers';
 import FloorSelector from '../components/Map/FloorSelector';
 import { useFloors } from '../hooks/useFloors';
 import { useFacilities } from '../hooks/useFacilities';
-import { MAP_CONFIG, GEO_CONFIG } from '../data/constants';
+import { MAP_CONFIG } from '../data/constants';
 
 /**
  * MapPage — The main map view.
@@ -28,6 +27,9 @@ const MapPage = ({ isSidebarExpanded }) => {
   const [insideBuildingId, setInsideBuildingId] = useState(null);
   const [selectedFloor, setSelectedFloor] = useState('All');
 
+  // ── Facility selection (detail card popup) ──────────────────────────────
+  const [selectedFacilityId, setSelectedFacilityId] = useState(null);
+
   const { floors } = useFloors(insideBuildingId);
   const { facilities } = useFacilities(insideBuildingId);
 
@@ -43,6 +45,14 @@ const MapPage = ({ isSidebarExpanded }) => {
     setSelectedBuildingId(null);
   }, []);
 
+  const handleFacilitySelect = useCallback((facility) => {
+    setSelectedFacilityId(facility.id);
+  }, []);
+
+  const handleFacilityCardClose = useCallback(() => {
+    setSelectedFacilityId(null);
+  }, []);
+
   const handleEnterBuilding = useCallback(
     (building) => {
       setInsideBuildingId(building.id);
@@ -54,7 +64,7 @@ const MapPage = ({ isSidebarExpanded }) => {
           center: [building.lng, building.lat],
           zoom: MAP_CONFIG.insideBuildingZoom,
           essential: true,
-          duration: GEO_CONFIG.flyToDuration,
+          duration: MAP_CONFIG.flyToDuration,
         });
       }
     },
@@ -71,7 +81,7 @@ const MapPage = ({ isSidebarExpanded }) => {
         center: MAP_CONFIG.defaultCenter,
         zoom: MAP_CONFIG.defaultZoom,
         essential: true,
-        duration: GEO_CONFIG.flyToDuration,
+        duration: MAP_CONFIG.flyToDuration,
       });
     }
   }, [mapInstance]);
@@ -80,8 +90,6 @@ const MapPage = ({ isSidebarExpanded }) => {
     <div className="w-full h-full relative overflow-hidden bg-background">
       <MapContainer setMapInstance={setMapInstance} />
       <SearchBar isSidebarExpanded={isSidebarExpanded} />
-      <RefocusButton mapInstance={mapInstance} />
-      <CurrentLocationDot mapInstance={mapInstance} />
 
       {/* Building markers (hidden when inside a building) */}
       {!isInsideMode && (
@@ -105,6 +113,7 @@ const MapPage = ({ isSidebarExpanded }) => {
             mapInstance={mapInstance}
             facilities={facilities}
             selectedFloor={selectedFloor}
+            onFacilitySelect={handleFacilitySelect}
           />
           <FloorSelector
             floors={floors}
@@ -112,16 +121,22 @@ const MapPage = ({ isSidebarExpanded }) => {
             onSelect={setSelectedFloor}
           />
 
-          {/* Back button */}
+          {/* Back button - Repositioned to Top-Right */}
           <button
             onClick={handleExitBuilding}
-            className="fixed top-5 left-5 z-30 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-surface/90 backdrop-blur-md border border-border shadow-md hover:border-primary hover:text-primary transition-smooth"
+            className="fixed top-5 right-5 z-30 flex items-center gap-2 px-4 py-2.5 text-sm font-semibold bg-surface/90 backdrop-blur-md border border-border shadow-md hover:border-primary hover:text-primary transition-smooth"
             style={{ borderRadius: 'var(--radius)' }}
           >
             ← Back to Campus
           </button>
         </>
       )}
+
+      {/* Facility detail card popup (inside building mode) */}
+      <FacilityDetailCard
+        facilityId={selectedFacilityId}
+        onClose={handleFacilityCardClose}
+      />
     </div>
   );
 };

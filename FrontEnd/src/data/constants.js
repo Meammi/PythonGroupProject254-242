@@ -16,11 +16,5 @@ export const MAP_CONFIG = {
   minZoom: 10,
   maxZoom: 20,
   maxTileCacheSize: 500, // Caching optimization limit
-};
-
-export const GEO_CONFIG = {
-  enableHighAccuracy: false,
-  maximumAge: 10000,
-  timeout: 5000,
-  flyToDuration: 1200
+  flyToDuration: 1200, // Shared animation duration
 };

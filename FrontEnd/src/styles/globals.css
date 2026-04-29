@@ -8,7 +8,7 @@
   :root {
     /* Brand Colors (จากรูป Design System) */
     --color-tu-red: #9E1B32;
-    --color-tu-gold: #C5A059; 
+    --color-tu-gold: #C5A059;
     --color-tu-teal: #005C53;
     --color-tu-orange: #e99c39;
 
@@ -57,25 +57,44 @@ body {
 }
 
 /* ── Building Marker Styles ──────────────────────────────────────────────── */
+/*
+ * Anti-drift rules:
+ *   1. Fixed width/height so MapLibre knows the element size for anchor:'center'.
+ *   2. NO transform here — MapLibre exclusively sets translate() for positioning.
+ *   3. will-change: transform → promotes to GPU layer for smooth zoom.
+ *   4. box-sizing: border-box → border doesn't shift the center.
+ *   5. z-index: 2 → building markers render above facility markers.
+ */
 
 .building-marker-wrapper {
+  width: 40px;
+  height: 40px;
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
+  overflow: visible;
+  will-change: transform;
+  pointer-events: auto;
+  box-sizing: border-box;
+  z-index: 2;
+  /* NO transform here — MapLibre owns translate() */
 }
 
 .building-marker-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
   background-color: var(--color-tu-red);
   border-radius: var(--radius);
   box-shadow: 0 2px 8px rgba(158, 27, 50, 0.35);
   transition: var(--transition-smooth);
+  transform-origin: center center;
+  box-sizing: border-box;
 }
 
 .building-marker-wrapper:hover .building-marker-icon {
@@ -109,13 +128,24 @@ body {
 }
 
 /* ── Facility Marker Styles ──────────────────────────────────────────────── */
+/*
+ * Mirrors building marker rules exactly, just smaller (28px).
+ * z-index: 1 → renders below building markers.
+ */
 
 .facility-marker-wrapper {
+  width: 28px;
+  height: 28px;
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
+  overflow: visible;
+  will-change: transform;
+  pointer-events: auto;
+  box-sizing: border-box;
+  z-index: 1;
 }
 
 .facility-marker-pin {
@@ -124,19 +154,22 @@ body {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-tu-red);
-  border-radius: 50%;
-  color: var(--color-tu-red);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+  background-color: var(--color-tu-red);
+  border: 1px solid var(--color-surface);
+  border-radius: 8px;
+  color: var(--color-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   transition: var(--transition-smooth);
+  transform-origin: center center;
+  box-sizing: border-box;
 }
 
 .facility-marker-wrapper:hover .facility-marker-pin {
   transform: scale(1.15);
-  background-color: var(--color-tu-red);
+  background-color: var(--color-tu-gold);
   color: var(--color-surface);
-  box-shadow: 0 4px 12px rgba(158, 27, 50, 0.40);
+  box-shadow: 0 4px 12px rgba(197, 160, 89, 0.40);
 }
 
 .facility-marker-tooltip {

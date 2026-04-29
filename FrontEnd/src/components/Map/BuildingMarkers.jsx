@@ -7,12 +7,12 @@ import { useBuildings } from '../../hooks/useBuildings';
 /**
  * Renders building markers on the MapLibre map.
  *
- * Each marker is a branded rounded-square with a Landmark icon,
- * and displays a tooltip with the building name on hover.
- * Clicking a marker triggers onBuildingSelect with the building object.
- *
- * This component renders nothing in the React tree —
- * it injects DOM elements into the MapLibre canvas via markers.
+ * Anti-drift strategy:
+ *   - anchor: 'center' → MapLibre pins the element's center to the GPS point.
+ *   - No CSS transform on the wrapper — let MapLibre own the positioning.
+ *   - Fixed wrapper dimensions (40×40) so MapLibre can calculate the center offset.
+ *   - rotationAlignment + pitchAlignment = 'viewport' → flat on screen at all angles.
+ *   - will-change: transform in CSS → GPU compositing for smooth zoom transitions.
  *
  * @param {{ mapInstance: maplibregl.Map | null, onBuildingSelect?: (building) => void }} props
  */
@@ -38,7 +38,6 @@ const BuildingMarkers = ({ mapInstance, onBuildingSelect }) => {
       const iconBox = document.createElement('div');
       iconBox.className = 'building-marker-icon';
 
-      // Render Lucide icon into the iconBox using React
       const iconRoot = createRoot(iconBox);
       iconRoot.render(<Landmark size={18} color="#FFFFFF" strokeWidth={2.2} />);
 
@@ -56,10 +55,12 @@ const BuildingMarkers = ({ mapInstance, onBuildingSelect }) => {
         onBuildingSelect?.(building);
       });
 
-      // ── Create MapLibre marker ──────────────────────────────────────
+      // ── Create MapLibre marker (unified anchor system) ──────────────
       const marker = new maplibregl.Marker({
         element: el,
-        anchor: 'bottom',
+        anchor: 'center',
+        rotationAlignment: 'viewport',
+        pitchAlignment: 'viewport',
       })
         .setLngLat([building.lng, building.lat])
         .addTo(mapInstance);
@@ -74,7 +75,6 @@ const BuildingMarkers = ({ mapInstance, onBuildingSelect }) => {
     };
   }, [mapInstance, buildings, isLoading, error, onBuildingSelect]);
 
-  // This component handles DOM injection into MapLibre — renders nothing in React tree
   return null;
 };
 

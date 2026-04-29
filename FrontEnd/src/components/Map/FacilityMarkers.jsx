@@ -1,28 +1,32 @@
 import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import { createRoot } from 'react-dom/client';
-import { Bath, Stethoscope, Coffee } from 'lucide-react';
+import { Toilet, Stethoscope, Coffee } from 'lucide-react';
 
 /**
  * Icon lookup based on facility type name.
  */
 const ICON_MAP = {
-  'toilet':      Bath,
+  'toilet':      Toilet,
   'health-care': Stethoscope,
   'store':       Coffee,
 };
 
 /**
  * Renders facility markers on the MapLibre map.
- * Filters by selected floor and renders type-based Lucide icons.
+ *
+ * Mirrors the BuildingMarkers anti-drift strategy exactly:
+ *   - anchor: 'center', viewport alignment, no CSS transform on wrapper.
+ *   - Fixed wrapper dimensions (28×28), box-sizing: border-box.
  *
  * @param {{
  *   mapInstance: maplibregl.Map | null,
  *   facilities: Array,
  *   selectedFloor: string,
+ *   onFacilitySelect?: (facility) => void,
  * }} props
  */
-const FacilityMarkers = React.memo(({ mapInstance, facilities, selectedFloor }) => {
+const FacilityMarkers = React.memo(({ mapInstance, facilities, selectedFloor, onFacilitySelect }) => {
   const markersRef = useRef([]);
 
   useEffect(() => {
@@ -47,12 +51,12 @@ const FacilityMarkers = React.memo(({ mapInstance, facilities, selectedFloor }) 
       const el = document.createElement('div');
       el.className = 'facility-marker-wrapper';
 
-      // ── Circular pin ──────────────────────────────────────────────
+      // ── Pin ───────────────────────────────────────────────────────
       const pin = document.createElement('div');
       pin.className = 'facility-marker-pin';
 
       const iconRoot = createRoot(pin);
-      iconRoot.render(<IconComponent size={14} />);
+      iconRoot.render(<IconComponent size={14} color="#FFFFFF" strokeWidth={2.5} />);
 
       // ── Tooltip ───────────────────────────────────────────────────
       const tooltip = document.createElement('div');
@@ -62,9 +66,18 @@ const FacilityMarkers = React.memo(({ mapInstance, facilities, selectedFloor }) 
       el.appendChild(pin);
       el.appendChild(tooltip);
 
+      // ── Click handler → open detail card ───────────────────────────
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onFacilitySelect?.(facility);
+      });
+
+      // ── Create MapLibre marker (unified with BuildingMarkers) ─────
       const marker = new maplibregl.Marker({
         element: el,
         anchor: 'center',
+        rotationAlignment: 'viewport',
+        pitchAlignment: 'viewport',
       })
         .setLngLat([facility.lng, facility.lat])
         .addTo(mapInstance);
@@ -76,7 +89,7 @@ const FacilityMarkers = React.memo(({ mapInstance, facilities, selectedFloor }) 
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
     };
-  }, [mapInstance, facilities, selectedFloor]);
+  }, [mapInstance, facilities, selectedFloor, onFacilitySelect]);
 
   return null;
 });
@@ -84,3 +97,4 @@ const FacilityMarkers = React.memo(({ mapInstance, facilities, selectedFloor }) 
 FacilityMarkers.displayName = 'FacilityMarkers';
 
 export default FacilityMarkers;
+
