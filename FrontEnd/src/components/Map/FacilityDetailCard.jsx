@@ -3,7 +3,7 @@ import {
   X,
   Bookmark,
   Thermometer,
-  Toilet,
+  Bath,
   Stethoscope,
   Coffee,
   MessageCircle,
@@ -13,9 +13,10 @@ import { useFacilityTemperature } from '../../hooks/useFacilityTemperature';
 
 /**
  * Icon lookup for facility type header.
+ * Bath is used for toilet facilities (cleaner icon than unavailable Toilet).
  */
 const TYPE_ICON_MAP = {
-  'toilet':      { Icon: Toilet,      label: 'Restroom' },
+  'toilet':      { Icon: Bath,      label: 'Restroom' },
   'health-care': { Icon: Stethoscope, label: 'Health Care' },
   'store':       { Icon: Coffee,      label: 'Store' },
 };
@@ -39,15 +40,13 @@ function getTempStyle(temp) {
  */
 const FacilityDetailCard = ({ facilityId, onClose }) => {
   const { facility, isLoading, error } = useFacilityDetail(facilityId);
-  const { temperature, isLoading: tempLoading } = useFacilityTemperature(facilityId);
+  const { temperature, isLoading: tempLoading, error: tempError } = useFacilityTemperature(facilityId);
   const isVisible = facilityId != null;
 
   // Resolve the type icon and label
   const typeInfo = facility
     ? TYPE_ICON_MAP[facility.type?.name] || TYPE_ICON_MAP['store']
     : null;
-
-  const hasDescription = facility?.description && facility.description.trim() !== '' && facility.description !== 'No description';
 
   return (
     <>
@@ -165,7 +164,7 @@ const FacilityDetailCard = ({ facilityId, onClose }) => {
                     </p>
                     {tempLoading ? (
                       <div className="w-16 h-5 bg-border rounded animate-pulse" />
-                    ) : temperature != null ? (
+                    ) : temperature != null && !tempError ? (
                       <p
                         className="text-lg font-bold leading-tight"
                         style={{ color: getTempStyle(temperature).color }}
@@ -196,13 +195,13 @@ const FacilityDetailCard = ({ facilityId, onClose }) => {
                   >
                     <MessageCircle size={11} className="text-white" />
                   </div>
-                  {hasDescription ? (
+                  {facility?.description && facility.description.trim() !== '' && facility.description !== 'No description' ? (
                     <p className="text-sm leading-relaxed text-text/80 italic pl-2">
                       "{facility.description}"
                     </p>
                   ) : (
                     <p className="text-sm leading-relaxed text-text-muted/60 italic pl-2">
-                      No Description
+                      No des
                     </p>
                   )}
                 </div>
