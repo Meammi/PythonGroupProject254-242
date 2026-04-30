@@ -67,6 +67,7 @@ def upgrade() -> None:
     )
 
 
+
 def downgrade() -> None:
     op.drop_table("facilities")
     op.drop_table("floors")

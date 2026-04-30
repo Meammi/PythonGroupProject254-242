@@ -34,9 +34,10 @@ async def get_facilities_by_building_id(
     building_id: int,
     floor_code: Optional[str] = None,
     facility_types: Optional[list[str]] = None,
-) -> list[Facility]:
+) -> list[tuple]:
+    """Return (Facility, floor_code, type_name, type_icon) tuples."""
     query = (
-        select(Facility)
+        select(Facility, Floor.floor_code, FacilityType.name, FacilityType.icon)
         .join(Floor, Facility.floor_id == Floor.id)
         .join(FacilityType, Facility.facility_type_id == FacilityType.id)
         .where(Facility.building_id == building_id)
@@ -51,7 +52,7 @@ async def get_facilities_by_building_id(
         query = query.where(FacilityType.name.in_(facility_types))
 
     result = await db.execute(query)
-    return list(result.scalars().all())
+    return list(result.tuples().all())
 
 
 # ── Create ───────────────────────────────────────────────────────────────────

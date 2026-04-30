@@ -4,7 +4,27 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schema.index import Facility, FacilityType, Floor
+from src.db.schema.index import Building, Facility, FacilityType, Floor
+
+
+# ── Pydantic Schemas ─────────────────────────────────────────────────────────
+
+class FacilityTypeDetail(BaseModel):
+    name: str
+    icon: str
+
+
+class FacilityDetailResponse(BaseModel):
+    id: int
+    name: str
+    lat: Optional[float]
+    lng: Optional[float]
+    description: Optional[str]
+    is_active: bool
+    floor: str
+    type: FacilityTypeDetail
+    building_name: str
+    building_code: str
 
 
 class CreateFacilityRequest(BaseModel):
@@ -20,29 +40,39 @@ class UpdateFacilityRequest(BaseModel):
     name: str
 
 
-async def get_facility_by_id(facility_id: int, db: AsyncSession) -> dict:
+# ── GET /facilities/{id} ────────────────────────────────────────────────────
+
+async def get_facility_by_id(
+    facility_id: int, db: AsyncSession
+) -> FacilityDetailResponse:
+    """Return a single facility with its floor, type, and parent building info."""
     result = await db.execute(
-        select(Facility, Floor, FacilityType)
+        select(Facility, Floor.floor_code, FacilityType.name, FacilityType.icon,
+               Building.name, Building.code)
         .join(Floor, Facility.floor_id == Floor.id)
         .join(FacilityType, Facility.facility_type_id == FacilityType.id)
+        .join(Building, Facility.building_id == Building.id)
         .where(Facility.id == facility_id)
-        .where(Facility.is_active)
     )
     row = result.first()
 
     if not row:
         raise HTTPException(status_code=404, detail="Facility not found")
 
-    facility, floor, facility_type = row
+    facility, floor_code, type_name, type_icon, bldg_name, bldg_code = row
 
-    return {
-        "id": facility.id,
-        "name": facility.name,
-        "floor": floor.floor_code,
-        "type": facility_type.name,
-        "lat": facility.latitude,
-        "lng": facility.longitude,
-    }
+    return FacilityDetailResponse(
+        id=facility.id,
+        name=facility.name,
+        lat=facility.latitude,
+        lng=facility.longitude,
+        description=facility.description,
+        is_active=facility.is_active,
+        floor=floor_code,
+        type=FacilityTypeDetail(name=type_name, icon=type_icon),
+        building_name=bldg_name,
+        building_code=bldg_code,
+    )
 
 
 async def create_facility(body: CreateFacilityRequest, db: AsyncSession) -> dict:

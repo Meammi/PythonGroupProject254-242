@@ -37,6 +37,7 @@ class BuildingDetailResponse(BaseModel):
     name: str
     lat: Optional[float]
     lng: Optional[float]
+    description: Optional[str]
 
 
 class FloorResponse(BaseModel):
@@ -48,11 +49,18 @@ class FloorsResponse(BaseModel):
     data: list[FloorResponse]
 
 
+class FacilityTypeResponse(BaseModel):
+    name: str
+    icon: str
+
+
 class FacilityResponse(BaseModel):
     id: int
     name: str
     lat: Optional[float]
     lng: Optional[float]
+    floor: str
+    type: FacilityTypeResponse
 
 
 class FacilitiesResponse(BaseModel):
@@ -90,6 +98,7 @@ async def get_building(
         name=building.code,
         lat=building.latitude,
         lng=building.longitude,
+        description=building.description,
     )
 
 
@@ -123,7 +132,7 @@ async def get_building_facilities(
     if building is None:
         raise HTTPException(status_code=404, detail="Building not found")
 
-    facilities = await building_service.get_facilities_by_building_id(
+    rows = await building_service.get_facilities_by_building_id(
         db,
         building_id,
         floor_code=floor,
@@ -136,8 +145,10 @@ async def get_building_facilities(
                 name=facility.name,
                 lat=facility.latitude,
                 lng=facility.longitude,
+                floor=fcode,
+                type=FacilityTypeResponse(name=type_name, icon=type_icon),
             )
-            for facility in facilities
+            for facility, fcode, type_name, type_icon in rows
         ]
     )
 
