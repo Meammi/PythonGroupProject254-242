@@ -28,3 +28,36 @@ export async function fetchBuildingById(buildingId) {
 
   return response.json();
 }
+
+/**
+ * Fetches the temperature reading for a specific building.
+ * @param {number} buildingId
+ * @returns {Promise<{ id: number, building_id: number, temperature: number, created_at: string } | null>}
+ */
+export async function fetchBuildingTemperature(buildingId) {
+  const response = await fetch(`${API_BASE_URL}/temperatures/building/${buildingId}`);
+
+  if (response.status === 404) {
+    return null; // No temperature data available
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch building temperature (HTTP ${response.status})`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Fetches all temperature readings.
+ * @returns {Promise<Array<{ id: number, building_id: number, temperature: number, created_at: string }>>}
+ */
+export async function fetchAllTemperatures() {
+  const response = await fetch(`${API_BASE_URL}/temperatures/`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch all temperatures (HTTP ${response.status})`);
+  }
+
+  return response.json();
+}

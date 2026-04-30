@@ -2,14 +2,12 @@ import React from 'react';
 import {
   X,
   Bookmark,
-  Thermometer,
   Bath,
   Stethoscope,
   Coffee,
   MessageCircle,
 } from 'lucide-react';
 import { useFacilityDetail } from '../../hooks/useFacilityDetail';
-import { useFacilityTemperature } from '../../hooks/useFacilityTemperature';
 
 /**
  * Icon lookup for facility type header.
@@ -27,20 +25,8 @@ const TYPE_ICON_MAP = {
  *   21-28°C → comfortable (gold)
  *   > 28°C → hot (red)
  */
-function getTempStyle(temp) {
-  if (temp <= 20) return { color: 'var(--color-tu-teal)', label: 'Cool' };
-  if (temp <= 28) return { color: 'var(--color-tu-gold)', label: 'Comfortable' };
-  return { color: 'var(--color-tu-red)', label: 'Warm' };
-}
-
-/**
- * FacilityDetailCard — A centered card showing facility information + temperature.
- *
- * @param {{ facilityId: number|null, onClose: () => void }} props
- */
 const FacilityDetailCard = ({ facilityId, onClose }) => {
   const { facility, isLoading, error } = useFacilityDetail(facilityId);
-  const { temperature, isLoading: tempLoading, error: tempError } = useFacilityTemperature(facilityId);
   const isVisible = facilityId != null;
 
   // Resolve the type icon and label
@@ -131,54 +117,6 @@ const FacilityDetailCard = ({ facilityId, onClose }) => {
 
               {/* Body Content */}
               <div className="px-5 py-4 space-y-3">
-
-                {/* ── Temperature Section ──────────────────────────────── */}
-                <div
-                  className="flex items-center gap-3 p-3.5"
-                  style={{
-                    backgroundColor: 'var(--color-background)',
-                    borderRadius: 'var(--radius)',
-                  }}
-                >
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      backgroundColor: temperature != null
-                        ? `${getTempStyle(temperature).color}15`
-                        : 'var(--color-border)',
-                    }}
-                  >
-                    <Thermometer
-                      size={18}
-                      style={{
-                        color: temperature != null
-                          ? getTempStyle(temperature).color
-                          : 'var(--color-text-muted)',
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] uppercase tracking-wider font-semibold text-text-muted mb-0.5">
-                      Temperature
-                    </p>
-                    {tempLoading ? (
-                      <div className="w-16 h-5 bg-border rounded animate-pulse" />
-                    ) : temperature != null && !tempError ? (
-                      <p
-                        className="text-lg font-bold leading-tight"
-                        style={{ color: getTempStyle(temperature).color }}
-                      >
-                        {temperature.toFixed(1)}°C
-                        <span className="text-xs font-medium ml-1.5 opacity-70">
-                          {getTempStyle(temperature).label}
-                        </span>
-                      </p>
-                    ) : (
-                      <p className="text-sm text-text-muted italic">N/A</p>
-                    )}
-                  </div>
-                </div>
 
                 {/* ── Description ──────────────────────────────────────── */}
                 <div

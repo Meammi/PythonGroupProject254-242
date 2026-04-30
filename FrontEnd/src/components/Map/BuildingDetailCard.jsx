@@ -4,9 +4,20 @@ import {
   Bookmark,
   Building2,
   MessageCircle,
+  Thermometer,
 } from 'lucide-react';
 import { useBuildingDetail } from '../../hooks/useBuildingDetail';
+import { useBuildingTemperature } from '../../hooks/useBuildingTemperature';
 import buildingFallback from '../../assets/images/SC1.webp';
+
+/**
+ * Returns a temperature color based on the value.
+ */
+function getTempStyle(temp) {
+  if (temp <= 20) return { color: 'var(--color-tu-teal)', label: 'Cool' };
+  if (temp <= 28) return { color: 'var(--color-tu-gold)', label: 'Comfortable' };
+  return { color: 'var(--color-tu-red)', label: 'Warm' };
+}
 
 /**
  * BuildingDetailCard — A slide-up card showing building information.
@@ -15,6 +26,7 @@ import buildingFallback from '../../assets/images/SC1.webp';
  */
 const BuildingDetailCard = ({ buildingId, onClose, onEnterBuilding }) => {
   const { building, isLoading, error } = useBuildingDetail(buildingId);
+  const { temperature, isLoading: tempLoading, error: tempError } = useBuildingTemperature(buildingId);
   const isVisible = buildingId != null;
 
   return (
@@ -97,6 +109,55 @@ const BuildingDetailCard = ({ buildingId, onClose, onEnterBuilding }) => {
 
               {/* Body Content */}
               <div className="px-5 py-4 space-y-4">
+                
+                {/* ── Temperature Section ──────────────────────────────── */}
+                <div
+                  className="flex items-center gap-3 p-3.5"
+                  style={{
+                    backgroundColor: 'var(--color-background)',
+                    borderRadius: 'var(--radius)',
+                  }}
+                >
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{
+                      backgroundColor: temperature != null
+                        ? `${getTempStyle(temperature).color}15`
+                        : 'var(--color-border)',
+                    }}
+                  >
+                    <Thermometer
+                      size={18}
+                      style={{
+                        color: temperature != null
+                          ? getTempStyle(temperature).color
+                          : 'var(--color-text-muted)',
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] uppercase tracking-wider font-semibold text-text-muted mb-0.5">
+                      Outdoor Temperature
+                    </p>
+                    {tempLoading ? (
+                      <div className="w-16 h-5 bg-border rounded animate-pulse" />
+                    ) : temperature != null && !tempError ? (
+                      <p
+                        className="text-lg font-bold leading-tight"
+                        style={{ color: getTempStyle(temperature).color }}
+                      >
+                        {temperature.toFixed(1)}°C
+                        <span className="text-xs font-medium ml-1.5 opacity-70">
+                          {getTempStyle(temperature).label}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="text-sm text-text-muted italic">N/A</p>
+                    )}
+                  </div>
+                </div>
+
                 {/* Description */}
                 {building.description && (
                   <div
