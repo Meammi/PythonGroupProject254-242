@@ -61,13 +61,13 @@ VALUES
     (5, 1, 2, 1, 'Toilet 5', 14.069806, 100.603862, 'No description', true),
     (6, 1, 2, 1, 'Toilet 6', 14.069322, 100.604066, 'No description', true),
     (7, 1, 2, 1, 'Toilet 7', 14.068599, 100.603391, 'No description', true),
-    (8, 1, 2, 1, 'Toilet 8', 14.068812, 100.602860, 'No description', true);
+    (8, 1, 2, 1, 'Toilet 8', 14.068812, 100.602860, 'No description', true),
 
     -- Floor 3 Toilets
     (9, 1, 3, 1, 'Toilet 9', 14.069806, 100.603862, 'No description', true),
     (10, 1, 3, 1, 'Toilet 10', 14.069322, 100.604066, 'No description', true),
     (11, 1, 3, 1, 'Toilet 11', 14.068599, 100.603391, 'No description', true),
-    (12, 1, 3, 1, 'Toilet 12', 14.068812, 100.602860, 'No description', true);
+    (12, 1, 3, 1, 'Toilet 12', 14.068812, 100.602860, 'No description', true),
 
     -- Floor 4 Toilets
     (13, 1, 4, 1, 'Toilet 13', 14.069806, 100.603862, 'No description', true),
@@ -82,16 +82,16 @@ VALUES
     (17, 1, 1, 2, 'Friend Coffee (Yellow Store)', 14.069161, 100.602763, 
      'Favorite store for food and coffee for TU students.', true),
 
-    (18, 1, 1, 2, 'Fresh Me', 14.069166, 14.069166, 
+    (18, 1, 1, 2, 'Fresh Me', 14.069166, 100.6069166, 
      'Refreshing Thai-style bubble tea and signature beverages.', true),
 
-    (11, 1, 1, 2, 'Frosty Box', 14.069062, 100.603868, 
+    (19, 1, 1, 2, 'Frosty Box', 14.069062, 100.603868, 
      'Popular ice cream shop at TU Rangsit, famous for its variety of soft serve and gelato.', true);
 
 -- ── 4c. Health-care (type_id = 3) ───────────────────────────────────────────
 INSERT INTO facilities (id, building_id, floor_id, facility_type_id, name, latitude, longitude, description, is_active)
 VALUES
-    (12, 1, 1, 3, 'Well Being', 14.068859, 100.603707, 
+    (20, 1, 1, 3, 'Well Being', 14.068859, 100.603707, 
      'Small clinic for TU students providing basic health services.', true);
 
 -- ============================================================================

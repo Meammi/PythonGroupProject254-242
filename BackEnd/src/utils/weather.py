@@ -1,7 +1,7 @@
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import select
+from sqlalchemy import select, func
 from src.db.schema.index import Temperature, Building, Facility
 
 async def fetch_temperature(lat: float, lon: float) -> float:
@@ -41,7 +41,10 @@ async def save_temperature(
     
     stmt = stmt.on_conflict_do_update(
         constraint="uq_temperature_location",
-        set_={"temperature": temperature}
+        set_={
+            "temperature": temperature,
+            "created_at": func.now()
+        }
     )
     
     await db.execute(stmt)
