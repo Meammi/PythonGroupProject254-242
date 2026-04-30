@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-from fastapi import Depends, HTTPException, Query
+from fastapi import Body, Depends, HTTPException, Path, Query
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -86,7 +86,7 @@ async def get_buildings(db: AsyncSession = Depends(get_db_session)) -> Buildings
 
 
 async def get_building(
-    building_id: int,
+    building_id: int = Path(..., ge=1),
     db: AsyncSession = Depends(get_db_session),
 ) -> BuildingDetailResponse:
     building = await building_service.get_building_by_id(db, building_id)
@@ -103,7 +103,7 @@ async def get_building(
 
 
 async def get_building_floors(
-    building_id: int,
+    building_id: int = Path(..., ge=1),
     db: AsyncSession = Depends(get_db_session),
 ) -> FloorsResponse:
     building = await building_service.get_building_by_id(db, building_id)
@@ -123,7 +123,7 @@ async def get_building_floors(
 
 
 async def get_building_facilities(
-    building_id: int,
+    building_id: int = Path(..., ge=1),
     floor: Optional[str] = None,
     facility_types: Optional[list[str]] = Query(default=None, alias="type"),
     db: AsyncSession = Depends(get_db_session),
@@ -162,6 +162,8 @@ async def create_building(
     """Create a new building entry."""
     try:
         new_building = await building_service.create_building(db, body)
+    except building_service.BuildingValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         logger.error("Failed to create building: %s", exc)
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -170,8 +172,8 @@ async def create_building(
 
 
 async def update_building(
-    building_id: int,
-    body: UpdateBuildingRequest,
+    building_id: int = Path(..., ge=1),
+    body: UpdateBuildingRequest = Body(...),
     db: AsyncSession = Depends(get_db_session),
 ) -> MessageOut:
     """Update an existing building (partial update)."""
@@ -181,6 +183,8 @@ async def update_building(
 
     try:
         await building_service.update_building(db, building, body)
+    except building_service.BuildingValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         logger.error("Failed to update building id=%s: %s", building_id, exc)
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -189,7 +193,7 @@ async def update_building(
 
 
 async def delete_building(
-    building_id: int,
+    building_id: int = Path(..., ge=1),
     db: AsyncSession = Depends(get_db_session),
 ) -> MessageOut:
     """Delete a building by its ID (hard delete)."""

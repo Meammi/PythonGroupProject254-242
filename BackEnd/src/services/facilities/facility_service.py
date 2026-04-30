@@ -10,6 +10,10 @@ from src.schemas.facility import CreateFacilityRequest, UpdateFacilityRequest
 logger = logging.getLogger(__name__)
 
 
+class FacilityValidationError(ValueError):
+    """Raised when facility business validation fails."""
+
+
 async def get_facility_detail_by_id(
     db: AsyncSession,
     facility_id: int,
@@ -28,6 +32,21 @@ async def create_facility(
     db: AsyncSession,
     data: CreateFacilityRequest,
 ) -> Facility:
+    building = await facility_repo.get_building_by_id(db, data.building_id)
+    if building is None:
+        raise FacilityValidationError("Building not found")
+
+    floor = await facility_repo.get_floor_by_id(db, data.floor_id)
+    if floor is None:
+        raise FacilityValidationError("Floor not found")
+
+    if floor.building_id != data.building_id:
+        raise FacilityValidationError("Floor does not belong to building")
+
+    facility_type = await facility_repo.get_facility_type_by_id(db, data.type_id)
+    if facility_type is None:
+        raise FacilityValidationError("Facility type not found")
+
     new_facility = Facility(
         name=data.name,
         building_id=data.building_id,

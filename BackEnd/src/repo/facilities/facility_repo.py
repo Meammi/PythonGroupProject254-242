@@ -9,6 +9,27 @@ from src.db.schema.index import Building, Facility, FacilityType, Floor
 logger = logging.getLogger(__name__)
 
 
+async def get_building_by_id(
+    db: AsyncSession,
+    building_id: int,
+) -> Optional[Building]:
+    return await db.get(Building, building_id)
+
+
+async def get_floor_by_id(
+    db: AsyncSession,
+    floor_id: int,
+) -> Optional[Floor]:
+    return await db.get(Floor, floor_id)
+
+
+async def get_facility_type_by_id(
+    db: AsyncSession,
+    facility_type_id: int,
+) -> Optional[FacilityType]:
+    return await db.get(FacilityType, facility_type_id)
+
+
 async def get_facility_detail_by_id(
     db: AsyncSession,
     facility_id: int,

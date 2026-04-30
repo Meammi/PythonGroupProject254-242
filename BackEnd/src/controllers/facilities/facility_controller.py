@@ -42,6 +42,8 @@ async def get_facility_by_id(
 async def create_facility(body: CreateFacilityRequest, db: AsyncSession) -> dict:
     try:
         new_facility = await facility_service.create_facility(db, body)
+    except facility_service.FacilityValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         logger.error("Failed to create facility: %s", exc)
         raise HTTPException(status_code=400, detail=str(exc)) from exc

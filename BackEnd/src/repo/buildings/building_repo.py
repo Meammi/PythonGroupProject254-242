@@ -20,6 +20,11 @@ async def get_building_by_id(db: AsyncSession, building_id: int) -> Optional[Bui
     return await db.get(Building, building_id)
 
 
+async def get_building_by_code(db: AsyncSession, code: str) -> Optional[Building]:
+    result = await db.execute(select(Building).where(Building.code == code))
+    return result.scalar_one_or_none()
+
+
 async def get_floors_by_building_id(db: AsyncSession, building_id: int) -> list[Floor]:
     result = await db.execute(
         select(Floor)

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class FacilityTypeDetail(BaseModel):
@@ -22,13 +22,13 @@ class FacilityDetailResponse(BaseModel):
 
 
 class CreateFacilityRequest(BaseModel):
-    name: str
-    building_id: int
-    floor_id: int
-    type_id: int
+    name: str = Field(..., min_length=1, max_length=255)
+    building_id: int = Field(..., ge=1)
+    floor_id: int = Field(..., ge=1)
+    type_id: int = Field(..., ge=1)
     lat: Optional[float] = None
     lng: Optional[float] = None
 
 
 class UpdateFacilityRequest(BaseModel):
-    name: str
+    name: str = Field(..., min_length=1, max_length=255)

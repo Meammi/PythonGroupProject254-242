@@ -10,6 +10,10 @@ from src.schemas.building import CreateBuildingRequest, UpdateBuildingRequest
 logger = logging.getLogger(__name__)
 
 
+class BuildingValidationError(ValueError):
+    """Raised when building business validation fails."""
+
+
 # ── Read ─────────────────────────────────────────────────────────────────────
 
 async def get_all_buildings(db: AsyncSession) -> list[Building]:
@@ -44,6 +48,10 @@ async def create_building(
     db: AsyncSession,
     data: CreateBuildingRequest,
 ) -> Building:
+    existing_building = await building_repo.get_building_by_code(db, data.code)
+    if existing_building is not None:
+        raise BuildingValidationError("Building code already exists")
+
     new_building = Building(
         code=data.code,
         name=data.name,
@@ -66,6 +74,13 @@ async def update_building(
     if not update_data:
         logger.warning("update_building called with no fields to update, id=%s", building.id)
         return building
+
+    new_code = update_data.get("code")
+    if new_code is not None and new_code != building.code:
+        existing_building = await building_repo.get_building_by_code(db, new_code)
+        if existing_building is not None and existing_building.id != building.id:
+            raise BuildingValidationError("Building code already exists")
+
     return await building_repo.update_building(db, building, update_data)
 
 
