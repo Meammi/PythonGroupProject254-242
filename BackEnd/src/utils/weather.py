@@ -4,14 +4,20 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy import select, func
 from src.db.schema.index import Temperature, Building, Facility
 
-async def fetch_temperature(lat: float, lon: float) -> float:
+async def fetch_batch_weather(coordinates: list[dict]) -> list[float]:
     """
-    Fetch current temperature from Open-Meteo API.
+    Fetch temperatures for multiple coordinates in a single request.
     """
+    if not coordinates:
+        return []
+    
+    lats = [str(c["lat"]) for c in coordinates]
+    lons = [str(c["lon"]) for c in coordinates]
+    
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
-        "latitude": lat,
-        "longitude": lon,
+        "latitude": ",".join(lats),
+        "longitude": ",".join(lons),
         "current_weather": True
     }
     
@@ -19,7 +25,12 @@ async def fetch_temperature(lat: float, lon: float) -> float:
         response = await client.get(url, params=params)
         response.raise_for_status()
         data = response.json()
-        return data["current_weather"]["temperature"]
+        
+        # Open-Meteo returns a list if multiple locations are requested
+        if isinstance(data, list):
+            return [item["current_weather"]["temperature"] for item in data]
+        return [data["current_weather"]["temperature"]]
+
 
 async def save_temperature(
     db: AsyncSession,
@@ -29,8 +40,7 @@ async def save_temperature(
     temperature: float
 ) -> None:
     """
-    Save temperature data to the database using UPSERT.
-    If a record for the same location exists, update the temperature.
+    Save single temperature data (kept for backward compatibility/individual updates).
     """
     stmt = pg_insert(Temperature).values(
         building_id=building_id,
@@ -59,9 +69,7 @@ async def update_location_weather(
 ) -> float | None:
     """
     Query coordinates from DB, fetch weather, and save it.
-    Returns the fetched temperature, or None if coordinates not found.
     """
-    # 1. Try to get coordinates from Facility
     result = await db.execute(select(Facility).where(Facility.id == facility_id))
     facility = result.scalar_one_or_none()
     
@@ -69,18 +77,18 @@ async def update_location_weather(
     if facility and facility.latitude is not None and facility.longitude is not None:
         lat, lon = facility.latitude, facility.longitude
     else:
-        # 2. Fallback to Building coordinates
         result = await db.execute(select(Building).where(Building.id == building_id))
         building = result.scalar_one_or_none()
         if building and building.latitude is not None and building.longitude is not None:
             lat, lon = building.latitude, building.longitude
             
     if lat is None or lon is None:
-        return None  # Or raise an exception, depending on your error handling policy
+        return None
         
-    temperature = await fetch_temperature(lat, lon)
+    temperature = (await fetch_batch_weather([{"lat": lat, "lon": lon}]))[0]
     await save_temperature(db, building_id, floor_id, facility_id, temperature)
     return temperature
+
 
 import asyncio
 import logging
@@ -89,30 +97,70 @@ logger = logging.getLogger(__name__)
 
 async def sync_all_weather_data(db: AsyncSession) -> None:
     """
-    Fetch all facilities and update their weather data periodically.
+    Fetch all facilities and update their weather data using Batch Requests and Bulk Upsert.
     """
-    logger.info("Starting automated weather synchronization...")
+    logger.info("Starting automated batch weather synchronization...")
     
+    # 1. Pre-fetch all facilities and buildings to avoid N+1 queries
     result = await db.execute(select(Facility))
     facilities = result.scalars().all()
     
-    success_count = 0
-    failure_count = 0
+    build_res = await db.execute(select(Building))
+    buildings_map = {b.id: b for b in build_res.scalars().all()}
     
-    for facility in facilities:
-        try:
-            temp = await update_location_weather(db, facility.building_id, facility.floor_id, facility.id)
-            if temp is not None:
-                success_count += 1
-            else:
-                failure_count += 1
-                logger.warning(f"Could not find coordinates for Facility ID: {facility.id}")
+    # 2. Collect coordinates for all facilities
+    to_sync = []
+    for f in facilities:
+        lat, lon = f.latitude, f.longitude
+        if lat is None or lon is None:
+            # Fallback to building coordinates
+            b = buildings_map.get(f.building_id)
+            if b:
+                lat, lon = b.latitude, b.longitude
+        
+        if lat is not None and lon is not None:
+            to_sync.append({
+                "building_id": f.building_id,
+                "floor_id": f.floor_id,
+                "facility_id": f.id,
+                "lat": lat,
+                "lon": lon
+            })
+
+    if not to_sync:
+        logger.info("No facilities with valid coordinates to sync.")
+        return
+
+    try:
+        # 3. Fetch all temperatures in ONE request
+        logger.info(f"Fetching weather for {len(to_sync)} locations...")
+        temperatures = await fetch_batch_weather(to_sync)
+        
+        # 4. Prepare data for Bulk UPSERT
+        values_list = []
+        for i, info in enumerate(to_sync):
+            values_list.append({
+                "building_id": info["building_id"],
+                "floor_id": info["floor_id"],
+                "facility_id": info["facility_id"],
+                "temperature": temperatures[i]
+            })
             
-            # Delay to avoid rate limits
-            await asyncio.sleep(0.5)
-        except Exception as e:
-            failure_count += 1
-            logger.error(f"Failed to update weather for Facility ID: {facility.id}. Error: {e}")
-            
-    logger.info(f"Weather sync completed. Success: {success_count}, Failures: {failure_count}")
+        # 5. Execute Bulk UPSERT
+        stmt = pg_insert(Temperature).values(values_list)
+        stmt = stmt.on_conflict_do_update(
+            constraint="uq_temperature_location",
+            set_={
+                "temperature": stmt.excluded.temperature,
+                "created_at": func.now()
+            }
+        )
+        
+        await db.execute(stmt)
+        await db.commit()
+        logger.info(f"Weather sync completed successfully for {len(to_sync)} facilities.")
+        
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Failed to perform batch weather sync: {e}")
 

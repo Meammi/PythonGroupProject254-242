@@ -82,7 +82,7 @@ VALUES
     (17, 1, 1, 2, 'Friend Coffee (Yellow Store)', 14.069161, 100.602763, 
      'Favorite store for food and coffee for TU students.', true),
 
-    (18, 1, 1, 2, 'Fresh Me', 14.069166, 100.6069166, 
+    (18, 1, 1, 2, 'Fresh Me', 14.069179745455557, 100.60390735068994, 
      'Refreshing Thai-style bubble tea and signature beverages.', true),
 
     (19, 1, 1, 2, 'Frosty Box', 14.069062, 100.603868, 
