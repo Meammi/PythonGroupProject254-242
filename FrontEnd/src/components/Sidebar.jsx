@@ -24,10 +24,14 @@ const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
     >
       
       {/* Top Logo */}
-      <div className="flex items-center justify-center p-1 h-52 border-b border-border">
-        {!isCollapsed && (
+      <div className={`flex items-center justify-center border-b border-border transition-all duration-300 ${isCollapsed ? 'h-20 p-5' : 'h-52 p-2'}`}>
+        {isCollapsed ? (
+          <div className="w-10 h-10 rounded-[12px] bg-primary flex items-center justify-center shrink-0 shadow-sm transition-smooth">
+            <Landmark className="text-surface" size={20} />
+          </div>
+        ) : (
           <div className="flex flex-col items-center overflow-hidden whitespace-nowrap">
-            <TULongLogo className="text-xl leading-tight" />
+            <TULongLogo />
           </div>
         )}
       </div>

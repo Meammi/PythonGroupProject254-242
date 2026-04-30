@@ -7,7 +7,7 @@ const TULongLogo = ({ className = '' }) => {
       <img 
         src={tuLongImg} 
         alt="TU LONG" 
-        className="h-48 object-contain" 
+        className="h-40 object-contain" 
       />
     </div>
   );
