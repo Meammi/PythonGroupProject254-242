@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import MapContainer from '../components/Map/MapContainer';
 import SearchBar from '../components/Map/SearchBar';
 import BuildingMarkers from '../components/Map/BuildingMarkers';
@@ -6,6 +6,7 @@ import BuildingDetailCard from '../components/Map/BuildingDetailCard';
 import FacilityDetailCard from '../components/Map/FacilityDetailCard';
 import FacilityMarkers from '../components/Map/FacilityMarkers';
 import FloorSelector from '../components/Map/FloorSelector';
+import { useBuildings } from '../hooks/useBuildings';
 import { useFloors } from '../hooks/useFloors';
 import { useFacilities } from '../hooks/useFacilities';
 import { MAP_CONFIG } from '../data/constants';
@@ -30,10 +31,25 @@ const MapPage = ({ isSidebarExpanded }) => {
   // ── Facility selection (detail card popup) ──────────────────────────────
   const [selectedFacilityId, setSelectedFacilityId] = useState(null);
 
+  // ── Facility filtering ──────────────────────────────────────────────────
+  const [facilityFilter, setFacilityFilter] = useState('all');
+
+  // ── Data fetching ───────────────────────────────────────────────────────
+  const { buildings } = useBuildings();
   const { floors } = useFloors(insideBuildingId);
   const { facilities } = useFacilities(insideBuildingId);
 
   const isInsideMode = insideBuildingId != null;
+
+  // ── Filter facilities based on selected filter type ─────────────────────
+  const filteredFacilities = useMemo(() => {
+    if (facilityFilter === 'all') return facilities;
+    
+    return facilities.filter((facility) => {
+      const facilityType = facility.type?.name || 'store';
+      return facilityType === facilityFilter;
+    });
+  }, [facilities, facilityFilter]);
 
   // ── Handlers ────────────────────────────────────────────────────────────
 
@@ -74,6 +90,7 @@ const MapPage = ({ isSidebarExpanded }) => {
   const handleExitBuilding = useCallback(() => {
     setInsideBuildingId(null);
     setSelectedFloor('All');
+    setFacilityFilter('all');
 
     // Zoom back out to campus level
     if (mapInstance) {
@@ -89,7 +106,18 @@ const MapPage = ({ isSidebarExpanded }) => {
   return (
     <div className="w-full h-full relative overflow-hidden bg-background">
       <MapContainer setMapInstance={setMapInstance} />
-      <SearchBar isSidebarExpanded={isSidebarExpanded} />
+      <SearchBar
+        isSidebarExpanded={isSidebarExpanded}
+        buildings={buildings}
+        facilities={facilities}
+        selectedBuildingId={insideBuildingId}
+        isInsideMode={isInsideMode}
+        facilityFilter={facilityFilter}
+        onFilterChange={setFacilityFilter}
+        onFacilitySelect={handleFacilitySelect}
+        onBuildingSelect={handleBuildingSelect}
+        mapInstance={mapInstance}
+      />
 
       {/* Building markers (hidden when inside a building) */}
       {!isInsideMode && (
@@ -111,7 +139,7 @@ const MapPage = ({ isSidebarExpanded }) => {
         <>
           <FacilityMarkers
             mapInstance={mapInstance}
-            facilities={facilities}
+            facilities={filteredFacilities}
             selectedFloor={selectedFloor}
             onFacilitySelect={handleFacilitySelect}
           />
