@@ -10,12 +10,12 @@ router = APIRouter(prefix="/temperatures", tags=["Temperatures"])
 async def read_temperatures(db: AsyncSession = Depends(get_db_session)):
     return await temperature_controller.get_all_temperatures(db)
 
-@router.get("/facility/{facility_id}", response_model=TemperatureResponse)
-async def read_temperature_by_facility(
-    facility_id: int,
+@router.get("/building/{building_id}", response_model=TemperatureResponse)
+async def read_temperature_by_building(
+    building_id: int,
     db: AsyncSession = Depends(get_db_session),
 ):
-    temp = await temperature_controller.get_temperature_by_facility(db, facility_id)
+    temp = await temperature_controller.get_temperature_by_building(db, building_id)
     if not temp:
-        raise HTTPException(status_code=404, detail="Temperature not found for this facility")
+        raise HTTPException(status_code=404, detail="Temperature not found for this building")
     return temp

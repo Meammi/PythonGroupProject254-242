@@ -10,8 +10,8 @@ async def get_all_temperatures(db: AsyncSession) -> list[Temperature]:
     return await temperature_repo.get_all_temperatures(db)
 
 
-async def get_temperature_by_facility(
+async def get_temperature_by_building(
     db: AsyncSession,
-    facility_id: int,
+    building_id: int,
 ) -> Optional[Temperature]:
-    return await temperature_repo.get_temperature_by_facility(db, facility_id)
+    return await temperature_repo.get_temperature_by_building(db, building_id)

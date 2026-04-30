@@ -11,11 +11,11 @@ async def get_all_temperatures(db: AsyncSession) -> list[Temperature]:
     return list(result.scalars().all())
 
 
-async def get_temperature_by_facility(
+async def get_temperature_by_building(
     db: AsyncSession,
-    facility_id: int,
+    building_id: int,
 ) -> Optional[Temperature]:
     result = await db.execute(
-        select(Temperature).where(Temperature.facility_id == facility_id)
+        select(Temperature).where(Temperature.building_id == building_id)
     )
     return result.scalar_one_or_none()

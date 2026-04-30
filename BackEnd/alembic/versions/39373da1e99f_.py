@@ -24,17 +24,13 @@ def upgrade() -> None:
     op.create_table('temperatures',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('building_id', sa.Integer(), nullable=False),
-    sa.Column('floor_id', sa.Integer(), nullable=False),
-    sa.Column('facility_id', sa.Integer(), nullable=False),
     sa.Column('temperature', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['building_id'], ['buildings.id'], ),
-    sa.ForeignKeyConstraint(['facility_id'], ['facilities.id'], ),
-    sa.ForeignKeyConstraint(['floor_id'], ['floors.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('building_id', 'floor_id', 'facility_id', name='uq_temperature_location')
+    sa.UniqueConstraint('building_id', name='uq_temperature_building')
     )
-    op.create_index(op.f('ix_temperatures_building_id'), 'temperatures', ['building_id'], unique=False)
+    op.create_index(op.f('ix_temperatures_building_id'), 'temperatures', ['building_id'], unique=True)
     # ### end Alembic commands ###
 
 

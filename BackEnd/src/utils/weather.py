@@ -35,22 +35,18 @@ async def fetch_batch_weather(coordinates: list[dict]) -> list[float]:
 async def save_temperature(
     db: AsyncSession,
     building_id: int,
-    floor_id: int,
-    facility_id: int,
     temperature: float
 ) -> None:
     """
-    Save single temperature data (kept for backward compatibility/individual updates).
+    Save single temperature data for a building.
     """
     stmt = pg_insert(Temperature).values(
         building_id=building_id,
-        floor_id=floor_id,
-        facility_id=facility_id,
         temperature=temperature
     )
     
     stmt = stmt.on_conflict_do_update(
-        constraint="uq_temperature_location",
+        index_elements=[Temperature.building_id],
         set_={
             "temperature": temperature,
             "created_at": func.now()
@@ -63,30 +59,20 @@ async def save_temperature(
 
 async def update_location_weather(
     db: AsyncSession,
-    building_id: int,
-    floor_id: int,
-    facility_id: int
+    building_id: int
 ) -> float | None:
     """
-    Query coordinates from DB, fetch weather, and save it.
+    Query coordinates for a building, fetch weather, and save it.
     """
-    result = await db.execute(select(Facility).where(Facility.id == facility_id))
-    facility = result.scalar_one_or_none()
+    result = await db.execute(select(Building).where(Building.id == building_id))
+    building = result.scalar_one_or_none()
     
-    lat, lon = None, None
-    if facility and facility.latitude is not None and facility.longitude is not None:
-        lat, lon = facility.latitude, facility.longitude
-    else:
-        result = await db.execute(select(Building).where(Building.id == building_id))
-        building = result.scalar_one_or_none()
-        if building and building.latitude is not None and building.longitude is not None:
-            lat, lon = building.latitude, building.longitude
-            
-    if lat is None or lon is None:
+    if not building or building.latitude is None or building.longitude is None:
         return None
         
+    lat, lon = building.latitude, building.longitude
     temperature = (await fetch_batch_weather([{"lat": lat, "lon": lon}]))[0]
-    await save_temperature(db, building_id, floor_id, facility_id, temperature)
+    await save_temperature(db, building_id, temperature)
     return temperature
 
 
@@ -97,43 +83,31 @@ logger = logging.getLogger(__name__)
 
 async def sync_all_weather_data(db: AsyncSession) -> None:
     """
-    Fetch all facilities and update their weather data using Batch Requests and Bulk Upsert.
+    Fetch all buildings and update their weather data using Batch Requests and Bulk Upsert.
     """
-    logger.info("Starting automated batch weather synchronization...")
+    logger.info("Starting automated batch weather synchronization per building...")
     
-    # 1. Pre-fetch all facilities and buildings to avoid N+1 queries
-    result = await db.execute(select(Facility))
-    facilities = result.scalars().all()
+    # 1. Fetch all buildings with coordinates
+    result = await db.execute(select(Building))
+    buildings = result.scalars().all()
     
-    build_res = await db.execute(select(Building))
-    buildings_map = {b.id: b for b in build_res.scalars().all()}
-    
-    # 2. Collect coordinates for all facilities
+    # 2. Collect coordinates for unique buildings
     to_sync = []
-    for f in facilities:
-        lat, lon = f.latitude, f.longitude
-        if lat is None or lon is None:
-            # Fallback to building coordinates
-            b = buildings_map.get(f.building_id)
-            if b:
-                lat, lon = b.latitude, b.longitude
-        
-        if lat is not None and lon is not None:
+    for b in buildings:
+        if b.latitude is not None and b.longitude is not None:
             to_sync.append({
-                "building_id": f.building_id,
-                "floor_id": f.floor_id,
-                "facility_id": f.id,
-                "lat": lat,
-                "lon": lon
+                "building_id": b.id,
+                "lat": b.latitude,
+                "lon": b.longitude
             })
 
     if not to_sync:
-        logger.info("No facilities with valid coordinates to sync.")
+        logger.info("No buildings with valid coordinates to sync.")
         return
 
     try:
         # 3. Fetch all temperatures in ONE request
-        logger.info(f"Fetching weather for {len(to_sync)} locations...")
+        logger.info(f"Fetching weather for {len(to_sync)} buildings...")
         temperatures = await fetch_batch_weather(to_sync)
         
         # 4. Prepare data for Bulk UPSERT
@@ -141,15 +115,13 @@ async def sync_all_weather_data(db: AsyncSession) -> None:
         for i, info in enumerate(to_sync):
             values_list.append({
                 "building_id": info["building_id"],
-                "floor_id": info["floor_id"],
-                "facility_id": info["facility_id"],
                 "temperature": temperatures[i]
             })
             
         # 5. Execute Bulk UPSERT
         stmt = pg_insert(Temperature).values(values_list)
         stmt = stmt.on_conflict_do_update(
-            constraint="uq_temperature_location",
+            index_elements=[Temperature.building_id],
             set_={
                 "temperature": stmt.excluded.temperature,
                 "created_at": func.now()
@@ -158,7 +130,7 @@ async def sync_all_weather_data(db: AsyncSession) -> None:
         
         await db.execute(stmt)
         await db.commit()
-        logger.info(f"Weather sync completed successfully for {len(to_sync)} facilities.")
+        logger.info(f"Weather sync completed successfully for {len(to_sync)} buildings.")
         
     except Exception as e:
         await db.rollback()
