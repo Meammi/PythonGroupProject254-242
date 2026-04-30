@@ -79,3 +79,37 @@ async def update_location_weather(
     await save_temperature(db, building_id, floor_id, facility_id, temperature)
     return temperature
 
+import asyncio
+import logging
+
+logger = logging.getLogger(__name__)
+
+async def sync_all_weather_data(db: AsyncSession) -> None:
+    """
+    Fetch all facilities and update their weather data periodically.
+    """
+    logger.info("Starting automated weather synchronization...")
+    
+    result = await db.execute(select(Facility))
+    facilities = result.scalars().all()
+    
+    success_count = 0
+    failure_count = 0
+    
+    for facility in facilities:
+        try:
+            temp = await update_location_weather(db, facility.building_id, facility.floor_id, facility.id)
+            if temp is not None:
+                success_count += 1
+            else:
+                failure_count += 1
+                logger.warning(f"Could not find coordinates for Facility ID: {facility.id}")
+            
+            # Delay to avoid rate limits
+            await asyncio.sleep(0.5)
+        except Exception as e:
+            failure_count += 1
+            logger.error(f"Failed to update weather for Facility ID: {facility.id}. Error: {e}")
+            
+    logger.info(f"Weather sync completed. Success: {success_count}, Failures: {failure_count}")
+
