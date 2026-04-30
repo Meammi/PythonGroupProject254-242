@@ -6,6 +6,7 @@ import BuildingDetailCard from '../components/Map/BuildingDetailCard';
 import FacilityDetailCard from '../components/Map/FacilityDetailCard';
 import FacilityMarkers from '../components/Map/FacilityMarkers';
 import FloorSelector from '../components/Map/FloorSelector';
+import FacilityFilterButton from '../components/Map/FacilityFilterButton';
 import { useBuildings } from '../hooks/useBuildings';
 import { useFloors } from '../hooks/useFloors';
 import { useFacilities } from '../hooks/useFacilities';
@@ -44,7 +45,7 @@ const MapPage = ({ isSidebarExpanded }) => {
   // ── Filter facilities based on selected filter type ─────────────────────
   const filteredFacilities = useMemo(() => {
     if (facilityFilter === 'all') return facilities;
-    
+
     return facilities.filter((facility) => {
       const facilityType = facility.type?.name || 'store';
       return facilityType === facilityFilter;
@@ -112,8 +113,6 @@ const MapPage = ({ isSidebarExpanded }) => {
         facilities={facilities}
         selectedBuildingId={insideBuildingId}
         isInsideMode={isInsideMode}
-        facilityFilter={facilityFilter}
-        onFilterChange={setFacilityFilter}
         onFacilitySelect={handleFacilitySelect}
         onBuildingSelect={handleBuildingSelect}
         mapInstance={mapInstance}
@@ -143,11 +142,24 @@ const MapPage = ({ isSidebarExpanded }) => {
             selectedFloor={selectedFloor}
             onFacilitySelect={handleFacilitySelect}
           />
-          <FloorSelector
-            floors={floors}
-            selectedFloor={selectedFloor}
-            onSelect={setSelectedFloor}
-          />
+          {/* Right-side Controls (Floor + Filter) */}
+          <div className="fixed right-5 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3.5 items-center">
+            <FacilityFilterButton
+              facilities={facilities}
+              selectedFilter={facilityFilter}
+              onFilterChange={setFacilityFilter}
+              isInsideMode={isInsideMode}
+            />
+
+            {/* Separator Line */}
+            <div className="w-8 h-px bg-[#CECECE]" />
+
+            <FloorSelector
+              floors={floors}
+              selectedFloor={selectedFloor}
+              onSelect={setSelectedFloor}
+            />
+          </div>
 
           {/* Back button - Repositioned to Top-Right */}
           <button

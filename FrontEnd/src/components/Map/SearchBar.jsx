@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Search, X, MapPin } from 'lucide-react';
-import FacilityFilterButton from './FacilityFilterButton'; 
-
 /**
  * SearchBar — Dual-Mode Search Component
  */
@@ -87,7 +85,7 @@ const SearchBar = ({
         
         {/* Search Input Box */}
         <div className="relative">
-          <div className="flex items-center bg-surface/90 backdrop-blur-md rounded-[var(--radius)] border border-border shadow-sm px-4 h-[46px] w-80 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-smooth">
+          <div className="flex items-center bg-surface rounded-[var(--radius)] border border-border shadow-md px-4 h-[46px] w-80 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-smooth">
             <Search className="text-text-muted mr-3 flex-shrink-0" size={20} />
             <input
               type="text"
@@ -139,14 +137,6 @@ const SearchBar = ({
             </div>
           )}
         </div>
-
-        {/*  เรียกใช้ Component แยกมาวางตรงนี้ */}
-        <FacilityFilterButton
-          facilities={facilities}
-          selectedFilter={facilityFilter}
-          onFilterChange={onFilterChange}
-          isInsideMode={isInsideMode}
-        />
         
       </div>
     </div>

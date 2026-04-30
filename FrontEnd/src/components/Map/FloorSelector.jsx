@@ -12,7 +12,7 @@ const FloorSelector = React.memo(({ floors, selectedFloor, onSelect }) => {
   const options = ['All', ...floors.map((f) => f.code)];
 
   return (
-    <div className="fixed right-5 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5">
       {options.map((code) => {
         const isActive = selectedFloor === code;
         return (
@@ -21,11 +21,11 @@ const FloorSelector = React.memo(({ floors, selectedFloor, onSelect }) => {
             onClick={() => onSelect(code)}
             className={`
               w-11 h-11 flex items-center justify-center text-xs font-bold
-              border backdrop-blur-md transition-smooth
+              border transition-smooth
               ${
                 isActive
                   ? 'bg-primary text-white border-primary shadow-lg'
-                  : 'bg-surface/80 text-text-muted border-border hover:border-primary hover:text-primary'
+                  : 'bg-surface text-text-muted border-border hover:border-primary hover:text-primary'
               }
             `}
             style={{ borderRadius: 'var(--radius)' }}

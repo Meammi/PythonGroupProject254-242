@@ -9,9 +9,24 @@ import {
 } from 'lucide-react';
 import { useFacilityDetail } from '../../hooks/useFacilityDetail';
 
+// Import facility images
+import yellowStoneImg from '../../assets/images/Yellow_Stone.jpg';
+import freshMeImg from '../../assets/images/Fresh_Me.jpg';
+import frostyBoxImg from '../../assets/images/Frosty_box.jpg';
+import wellBeingImg from '../../assets/images/Well_being.jpg';
+
+/**
+ * Mapping of facility names to their respective images.
+ */
+const FACILITY_IMAGE_MAP = {
+  'Friend Coffee (Yellow Store)': yellowStoneImg,
+  'Fresh Me': freshMeImg,
+  'Frosty Box': frostyBoxImg,
+  'Well Being': wellBeingImg,
+};
+
 /**
  * Icon lookup for facility type header.
- * Bath is used for toilet facilities (cleaner icon than unavailable Toilet).
  */
 const TYPE_ICON_MAP = {
   'toilet':      { Icon: Bath,      label: 'Restroom' },
@@ -20,16 +35,16 @@ const TYPE_ICON_MAP = {
 };
 
 /**
- * Returns a temperature color based on the value.
- *   ≤ 20°C → cool (teal)
- *   21-28°C → comfortable (gold)
- *   > 28°C → hot (red)
+ * FacilityDetailCard — A centered card showing facility information.
+ *
+ * @param {{ facilityId: number|null, onClose: () => void }} props
  */
 const FacilityDetailCard = ({ facilityId, onClose }) => {
   const { facility, isLoading, error } = useFacilityDetail(facilityId);
   const isVisible = facilityId != null;
 
-  // Resolve the type icon and label
+  // Resolve the image, type icon, and label
+  const facilityImage = facility ? FACILITY_IMAGE_MAP[facility.name] : null;
   const typeInfo = facility
     ? TYPE_ICON_MAP[facility.type?.name] || TYPE_ICON_MAP['store']
     : null;
@@ -77,42 +92,57 @@ const FacilityDetailCard = ({ facilityId, onClose }) => {
           {/* ── Content ────────────────────────────────────────────────── */}
           {facility && !isLoading && !error && (
             <>
-              {/* Header — Icon + Category Badge + Name */}
+              {/* Header — Image or Gradient */}
               <div
-                className="relative px-5 pt-5 pb-4"
+                className="relative h-44 overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, var(--color-tu-red) 0%, #c4324f 100%)',
+                  background: !facilityImage ? 'linear-gradient(135deg, var(--color-tu-red) 0%, #c4324f 100%)' : 'none',
                 }}
               >
+                {facilityImage && (
+                  <>
+                    <img
+                      src={facilityImage}
+                      alt={facility.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Gradient overlay for text readability when image is present */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  </>
+                )}
+
                 {/* Close button */}
                 <button
                   onClick={onClose}
-                  className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-white/90 hover:bg-white/30 transition-smooth"
+                  className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm text-white/90 hover:bg-black/50 transition-smooth"
                 >
                   <X size={16} strokeWidth={2.5} />
                 </button>
 
-                {/* Icon + Badge */}
-                <div className="flex items-center gap-3 mb-2">
-                  <div
-                    className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"
-                  >
-                    {typeInfo && <typeInfo.Icon size={20} className="text-white" />}
+                {/* Content Overlay */}
+                <div className="absolute bottom-4 left-5 right-5">
+                  {/* Icon + Badge */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div
+                      className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center"
+                    >
+                      {typeInfo && <typeInfo.Icon size={16} className="text-white" />}
+                    </div>
+                    <span className="inline-block px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-white/30 backdrop-blur-md text-white">
+                      {typeInfo?.label || 'Facility'}
+                    </span>
                   </div>
-                  <span className="inline-block px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-full bg-white/20 text-white">
-                    {typeInfo?.label || 'Facility'}
-                  </span>
+
+                  {/* Facility name */}
+                  <h2 className="text-white text-xl font-bold leading-tight drop-shadow-md">
+                    {facility.name || 'Unknown Facility'}
+                  </h2>
+
+                  {/* Building context */}
+                  <p className="text-white/80 text-[11px] mt-1 font-medium">
+                    {facility.building_name} • Floor {facility.floor}
+                  </p>
                 </div>
-
-                {/* Facility name */}
-                <h2 className="text-white text-xl font-bold leading-tight drop-shadow-md">
-                  {facility.name || 'Unknown Facility'}
-                </h2>
-
-                {/* Building context */}
-                <p className="text-white/70 text-xs mt-1 font-medium">
-                  {facility.building_name} • Floor {facility.floor}
-                </p>
               </div>
 
               {/* Body Content */}

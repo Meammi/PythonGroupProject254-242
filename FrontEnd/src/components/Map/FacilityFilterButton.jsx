@@ -45,11 +45,11 @@ const FacilityFilterButton = ({ facilities, selectedFilter, onFilterChange, isIn
       {/* Filter Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className={`flex items-center justify-center h-[46px] w-[46px] rounded-[var(--radius)] transition-smooth shadow-sm outline-none border backdrop-blur-md
+        className={`flex items-center justify-center h-11 w-11 rounded-[var(--radius)] transition-smooth shadow-sm outline-none border
           ${
             isExpanded || selectedFilter !== 'all'
-              ? 'bg-primary text-surface border-primary'
-              : 'bg-surface/90 text-text-muted border-border hover:border-primary hover:text-primary'
+              ? 'bg-primary text-surface border-primary shadow-lg'
+              : 'bg-surface text-text-muted border-border hover:border-primary hover:text-primary'
           }
         `}
         title="Filter Facilities"
@@ -57,20 +57,22 @@ const FacilityFilterButton = ({ facilities, selectedFilter, onFilterChange, isIn
         <Filter size={20} />
       </button>
 
-      {/* Expanded Filter Menu (Drops down from the button) */}
+      {/* Expanded Filter Menu (Expands to the left) */}
       {isExpanded && (
-        <div className="absolute top-full right-0 mt-2 flex flex-col gap-1 p-2 bg-surface border border-border rounded-[var(--radius)] shadow-lg z-50 min-w-[180px]">
-          {/* Close Button */}
-          <button
-            onClick={() => setIsExpanded(false)}
-            className="self-end p-1 text-text-muted hover:text-text transition-smooth"
-            title="Close filters"
-          >
-            <X size={16} />
-          </button>
+        <div className="absolute top-0 right-full mr-3 flex flex-col gap-1 p-2 bg-surface border border-border rounded-[var(--radius)] shadow-lg z-50 min-w-[160px]">
+          {/* Header with Close Button */}
+          <div className="flex items-center justify-between px-2 py-1 mb-1 border-b border-border/50">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Category</span>
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="p-1 text-text-muted hover:text-text transition-smooth"
+            >
+              <X size={14} />
+            </button>
+          </div>
 
           {/* Filter Options */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-0.5">
             {filters.map((filter) => {
               const isActive = selectedFilter === filter.id;
               const IconComponent = filter.icon;
@@ -82,7 +84,7 @@ const FacilityFilterButton = ({ facilities, selectedFilter, onFilterChange, isIn
                     onFilterChange(filter.id);
                     setIsExpanded(false);
                   }}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-[8px] transition-smooth whitespace-nowrap text-sm font-medium outline-none
+                  className={`flex items-center gap-3 px-3 py-2 rounded-[8px] transition-smooth whitespace-nowrap text-xs font-medium outline-none
                     ${
                       isActive
                         ? 'bg-primary text-surface shadow-sm'
@@ -90,7 +92,7 @@ const FacilityFilterButton = ({ facilities, selectedFilter, onFilterChange, isIn
                     }
                   `}
                 >
-                  <IconComponent size={18} />
+                  <IconComponent size={16} />
                   <span>{filter.label}</span>
                 </button>
               );
@@ -101,7 +103,7 @@ const FacilityFilterButton = ({ facilities, selectedFilter, onFilterChange, isIn
 
       {/* Active Notification Dot */}
       {!isExpanded && selectedFilter !== 'all' && (
-        <div className="absolute -top-1 -right-1 w-3 h-3 bg-tu-orange rounded-full border-2 border-surface shadow-sm"></div>
+        <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-tu-orange rounded-full border-2 border-surface shadow-sm animate-pulse"></div>
       )}
     </div>
   );
