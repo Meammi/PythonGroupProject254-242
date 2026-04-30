@@ -3,6 +3,16 @@ import { User, Landmark } from 'lucide-react';
 import { navigationItems } from '../data/navigation';
 import TULongLogo from './TULongLogo';
 
+/**
+ * Sidebar — Minimalist Map-First Navigation
+ *
+ * Simplified sidebar with:
+ *   - TU Logo and branding at top
+ *   - Single "Campus Map" navigation item
+ *   - Guest account section at bottom
+ *   - Responsive design with hover states
+ *   - Maximizes screen real estate for map view
+ */
 const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
   const isCollapsed = !isHovered;
 
@@ -21,15 +31,17 @@ const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
         {!isCollapsed && (
           <div className="flex flex-col overflow-hidden whitespace-nowrap">
             <TULongLogo className="text-xl leading-tight" />
-            <span className="text-text-muted text-[10px] tracking-wide uppercase font-medium mt-0.5">Campus Navigator</span>
+            <span className="text-text-muted text-[10px] tracking-wide uppercase font-medium mt-0.5">Campus Map</span>
           </div>
         )}
       </div>
 
-      {/* Navigation */}
+      {/* Navigation — Single Map Item */}
       <nav className="flex-1 py-6 px-3 flex flex-col gap-2 overflow-y-auto">
         {navigationItems.map((item) => {
           const isActive = activePage === item.id;
+          const IconComponent = item.icon;
+          
           return (
             <button 
               key={item.id}
@@ -46,7 +58,7 @@ const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
                 ${isCollapsed ? 'w-12 h-12 rounded-[14px]' : ''} 
                 ${isCollapsed && isActive ? 'bg-primary text-surface shadow-md' : ''}
               `}>
-                 <item.icon 
+                 <IconComponent
                    size={22} 
                    className={`transition-smooth
                      ${!isCollapsed && isActive ? 'text-primary' : ''} 
@@ -56,15 +68,15 @@ const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
               </div>
               {!isCollapsed && <span className="font-medium whitespace-nowrap text-sm">{item.label}</span>}
             </button>
-          )
+          );
         })}
       </nav>
 
-      {/* Bottom Account Section (Strictly Guest) */}
+      {/* Bottom Account Section (Guest) */}
       <div className="p-4 border-t border-border mt-auto">
         <div 
           className={`flex items-center gap-3 cursor-pointer p-2 rounded-[16px] hover:bg-background transition-smooth ${isCollapsed ? 'justify-center w-12 h-12 mx-auto p-0' : ''}`}
-          title="Click to login"
+          title="Guest Mode"
         >
           <div className="w-10 h-10 rounded-full bg-border flex items-center justify-center shrink-0">
             <User size={20} className="text-text-muted" />
@@ -72,7 +84,7 @@ const Sidebar = ({ activePage, setActivePage, isHovered, setIsHovered }) => {
           {!isCollapsed && (
             <div className="flex flex-col overflow-hidden whitespace-nowrap text-left">
               <span className="font-bold text-sm text-text">Guest</span>
-              <span className="text-xs text-text-muted font-medium hover:underline">Click to login</span>
+              <span className="text-xs text-text-muted font-medium">not logged in yet?</span>
             </div>
           )}
         </div>
