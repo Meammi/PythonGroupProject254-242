@@ -21,6 +21,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./src:/app/src
+      - ./alembic:/app/alembic
       - ./seed.sql:/app/seed.sql:ro
       - ./run_seed.py:/app/run_seed.py:ro
     command: sh -c "alembic upgrade head && python run_seed.py && uvicorn src.index:app --host 0.0.0.0 --port 8000 --reload"
