@@ -1,8 +1,11 @@
 import httpx
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from src.db.schema.index import Temperature, Building, Facility
+
+bangkok_tz = timezone(timedelta(hours=7))
 
 async def fetch_batch_weather(coordinates: list[dict]) -> list[float]:
     """
@@ -42,15 +45,20 @@ async def save_temperature(
     """
     stmt = pg_insert(Temperature).values(
         building_id=building_id,
-        temperature=temperature
+        temperature=temperature,
+        created_at=datetime.now(bangkok_tz).replace(tzinfo=None)
     )
     
     stmt = stmt.on_conflict_do_update(
         index_elements=[Temperature.building_id],
         set_={
-            "temperature": temperature,
-            "created_at": func.now()
-        }
+            "temperature": stmt.excluded.temperature,
+            "created_at": stmt.excluded.created_at
+        },
+        where=or_(
+            Temperature.temperature != stmt.excluded.temperature,
+            Temperature.created_at != stmt.excluded.created_at
+        )
     )
     
     await db.execute(stmt)
@@ -115,7 +123,8 @@ async def sync_all_weather_data(db: AsyncSession) -> None:
         for i, info in enumerate(to_sync):
             values_list.append({
                 "building_id": info["building_id"],
-                "temperature": temperatures[i]
+                "temperature": temperatures[i],
+                "created_at": datetime.now(bangkok_tz).replace(tzinfo=None)
             })
             
         # 5. Execute Bulk UPSERT
@@ -124,8 +133,12 @@ async def sync_all_weather_data(db: AsyncSession) -> None:
             index_elements=[Temperature.building_id],
             set_={
                 "temperature": stmt.excluded.temperature,
-                "created_at": func.now()
-            }
+                "created_at": stmt.excluded.created_at
+            },
+            where=or_(
+                Temperature.temperature != stmt.excluded.temperature,
+                Temperature.created_at != stmt.excluded.created_at
+            )
         )
         
         await db.execute(stmt)

@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from datetime import datetime, timezone
+import datetime
 from src.config import settings
 from src.middlewares.cors import setup_cors
 from src.routes.index import api_router
@@ -15,9 +15,16 @@ async def run_weather_sync():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    scheduler = AsyncIOScheduler(timezone=timezone.utc)
+    bangkok_tz = datetime.timezone(datetime.timedelta(hours=7))
+    scheduler = AsyncIOScheduler(timezone=bangkok_tz)
     # Run immediately, then every 1 hour
-    scheduler.add_job(run_weather_sync, 'interval', hours=1, next_run_time=datetime.now(timezone.utc))
+    scheduler.add_job(
+        run_weather_sync, 
+        'interval', 
+        hours=1, 
+        next_run_time=datetime.datetime.now(bangkok_tz),
+        misfire_grace_time=60
+    )
     scheduler.start()
     yield
     # Shutdown
