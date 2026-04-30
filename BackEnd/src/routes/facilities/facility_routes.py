@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.controllers.facilities import facility_controller
-from src.controllers.facilities.facility_controller import (
-    CreateFacilityRequest,
-    UpdateFacilityRequest,
-    FacilityDetailResponse,
-)
 from src.db.index import get_db_session
+from src.schemas.facility import (
+    CreateFacilityRequest,
+    FacilityDetailResponse,
+    UpdateFacilityRequest,
+)
 
 router = APIRouter(prefix="/facilities", tags=["facilities"])
 
@@ -23,7 +23,11 @@ async def create_facility(body: CreateFacilityRequest, db: AsyncSession = Depend
 
 
 @router.put("/{id}")
-async def update_facility(id: int, body: UpdateFacilityRequest, db: AsyncSession = Depends(get_db_session)):
+async def update_facility(
+    id: int,
+    body: UpdateFacilityRequest,
+    db: AsyncSession = Depends(get_db_session),
+):
     return await facility_controller.update_facility(id, body, db)
 
 

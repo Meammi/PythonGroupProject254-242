@@ -1,62 +1,26 @@
+import logging
+
 from fastapi import HTTPException
-from pydantic import BaseModel
-from typing import Optional
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.schema.index import Building, Facility, FacilityType, Floor
+from src.schemas.facility import (
+    CreateFacilityRequest,
+    FacilityDetailResponse,
+    FacilityTypeDetail,
+    UpdateFacilityRequest,
+)
+from src.services.facilities import facility_service
 
+logger = logging.getLogger(__name__)
 
-# ── Pydantic Schemas ─────────────────────────────────────────────────────────
-
-class FacilityTypeDetail(BaseModel):
-    name: str
-    icon: str
-
-
-class FacilityDetailResponse(BaseModel):
-    id: int
-    name: str
-    lat: Optional[float]
-    lng: Optional[float]
-    description: Optional[str]
-    is_active: bool
-    floor: str
-    type: FacilityTypeDetail
-    building_name: str
-    building_code: str
-
-
-class CreateFacilityRequest(BaseModel):
-    name: str
-    building_id: int
-    floor_id: int
-    type_id: int
-    lat: Optional[float] = None
-    lng: Optional[float] = None
-
-
-class UpdateFacilityRequest(BaseModel):
-    name: str
-
-
-# ── GET /facilities/{id} ────────────────────────────────────────────────────
 
 async def get_facility_by_id(
-    facility_id: int, db: AsyncSession
+    facility_id: int,
+    db: AsyncSession,
 ) -> FacilityDetailResponse:
     """Return a single facility with its floor, type, and parent building info."""
-    result = await db.execute(
-        select(Facility, Floor.floor_code, FacilityType.name, FacilityType.icon,
-               Building.name, Building.code)
-        .join(Floor, Facility.floor_id == Floor.id)
-        .join(FacilityType, Facility.facility_type_id == FacilityType.id)
-        .join(Building, Facility.building_id == Building.id)
-        .where(Facility.id == facility_id)
-    )
-    row = result.first()
-
-    if not row:
+    row = await facility_service.get_facility_detail_by_id(db, facility_id)
+    if row is None:
         raise HTTPException(status_code=404, detail="Facility not found")
 
     facility, floor_code, type_name, type_icon, bldg_name, bldg_code = row
@@ -76,17 +40,11 @@ async def get_facility_by_id(
 
 
 async def create_facility(body: CreateFacilityRequest, db: AsyncSession) -> dict:
-    new_facility = Facility(
-        name=body.name,
-        building_id=body.building_id,
-        floor_id=body.floor_id,
-        facility_type_id=body.type_id,
-        latitude=body.lat,
-        longitude=body.lng,
-    )
-    db.add(new_facility)
-    await db.commit()
-    await db.refresh(new_facility)
+    try:
+        new_facility = await facility_service.create_facility(db, body)
+    except Exception as exc:
+        logger.error("Failed to create facility: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return {
         "id": new_facility.id,
@@ -94,35 +52,33 @@ async def create_facility(body: CreateFacilityRequest, db: AsyncSession) -> dict
     }
 
 
-async def update_facility(facility_id: int, body: UpdateFacilityRequest, db: AsyncSession) -> dict:
-    result = await db.execute(
-        select(Facility)
-        .where(Facility.id == facility_id)
-        .where(Facility.is_active)
-    )
-    facility = result.scalars().first()
-
-    if not facility:
+async def update_facility(
+    facility_id: int,
+    body: UpdateFacilityRequest,
+    db: AsyncSession,
+) -> dict:
+    facility = await facility_service.get_active_facility_by_id(db, facility_id)
+    if facility is None:
         raise HTTPException(status_code=404, detail="Facility not found")
 
-    facility.name = body.name
-    await db.commit()
+    try:
+        await facility_service.update_facility(db, facility, body)
+    except Exception as exc:
+        logger.error("Failed to update facility id=%s: %s", facility_id, exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return {"message": "updated"}
 
 
 async def delete_facility(facility_id: int, db: AsyncSession) -> dict:
-    result = await db.execute(
-        select(Facility)
-        .where(Facility.id == facility_id)
-        .where(Facility.is_active)
-    )
-    facility = result.scalars().first()
-
-    if not facility:
+    facility = await facility_service.get_active_facility_by_id(db, facility_id)
+    if facility is None:
         raise HTTPException(status_code=404, detail="Facility not found")
 
-    facility.is_active = False
-    await db.commit()
+    try:
+        await facility_service.delete_facility(db, facility)
+    except Exception as exc:
+        logger.error("Failed to delete facility id=%s: %s", facility_id, exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return {"message": "deleted"}
