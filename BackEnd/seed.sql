@@ -52,28 +52,28 @@ VALUES
 INSERT INTO facilities (id, building_id, floor_id, facility_type_id, name, latitude, longitude, description, is_active)
 VALUES
     -- Floor 1 Toilets
-    (1, 1, 1, 1, 'Toilet 1', 14.069806, 100.603862, 'No description', true),
-    (2, 1, 1, 1, 'Toilet 2', 14.069322, 100.604066, 'No description', true),
-    (3, 1, 1, 1, 'Toilet 3', 14.068599, 100.603391, 'No description', true),
-    (4, 1, 1, 1, 'Toilet 4', 14.068812, 100.602860, 'No description', true),
+    (1, 1, 1, 1, 'Toilet 1', 14.069806, 100.603862, 'ห้องน้ำชั้น 1', true),
+    (2, 1, 1, 1, 'Toilet 2', 14.069322, 100.604066, 'ห้องน้ำชั้น 1', true),
+    (3, 1, 1, 1, 'Toilet 3', 14.068599, 100.603391, 'ห้องน้ำชั้น 1', true),
+    (4, 1, 1, 1, 'Toilet 4', 14.068812, 100.602860, 'ห้องน้ำชั้น 1', true),
     
     -- Floor 2 Toilets
-    (5, 1, 2, 1, 'Toilet 5', 14.069806, 100.603862, 'No description', true),
-    (6, 1, 2, 1, 'Toilet 6', 14.069322, 100.604066, 'No description', true),
-    (7, 1, 2, 1, 'Toilet 7', 14.068599, 100.603391, 'No description', true),
-    (8, 1, 2, 1, 'Toilet 8', 14.068812, 100.602860, 'No description', true),
+    (5, 1, 2, 1, 'Toilet 5', 14.069806, 100.603862, 'ห้องน้ำชั้น 2', true),
+    (6, 1, 2, 1, 'Toilet 6', 14.069322, 100.604066, 'ห้องน้ำชั้น 2', true),
+    (7, 1, 2, 1, 'Toilet 7', 14.068599, 100.603391, 'ห้องน้ำชั้น 2', true),
+    (8, 1, 2, 1, 'Toilet 8', 14.068812, 100.602860, 'ห้องน้ำชั้น 2', true),
 
     -- Floor 3 Toilets
-    (9, 1, 3, 1, 'Toilet 9', 14.069806, 100.603862, 'No description', true),
-    (10, 1, 3, 1, 'Toilet 10', 14.069322, 100.604066, 'No description', true),
-    (11, 1, 3, 1, 'Toilet 11', 14.068599, 100.603391, 'No description', true),
-    (12, 1, 3, 1, 'Toilet 12', 14.068812, 100.602860, 'No description', true),
+    (9, 1, 3, 1, 'Toilet 9', 14.069806, 100.603862, 'ห้องน้ำชั้น 3', true),
+    (10, 1, 3, 1, 'Toilet 10', 14.069322, 100.604066, 'ห้องน้ำชั้น 3', true),
+    (11, 1, 3, 1, 'Toilet 11', 14.068599, 100.603391, 'ห้องน้ำชั้น 3', true),
+    (12, 1, 3, 1, 'Toilet 12', 14.068812, 100.602860, 'ห้องน้ำชั้น 3', true),
 
     -- Floor 4 Toilets
-    (13, 1, 4, 1, 'Toilet 13', 14.069806, 100.603862, 'No description', true),
-    (14, 1, 4, 1, 'Toilet 14', 14.069322, 100.604066, 'No description', true),
-    (15, 1, 4, 1, 'Toilet 15', 14.068599, 100.603391, 'No description', true),
-    (16, 1, 4, 1, 'Toilet 16', 14.068812, 100.602860, 'No description', true);
+    (13, 1, 4, 1, 'Toilet 13', 14.069806, 100.603862, 'ห้องน้ำชั้น 4', true),
+    (14, 1, 4, 1, 'Toilet 14', 14.069322, 100.604066, 'ห้องน้ำชั้น 4', true),
+    (15, 1, 4, 1, 'Toilet 15', 14.068599, 100.603391, 'ห้องน้ำชั้น 4', true),
+    (16, 1, 4, 1, 'Toilet 16', 14.068812, 100.602860, 'ห้องน้ำชั้น 4', true);
 
 
 -- ── 4b. Stores (type_id = 2) ────────────────────────────────────────────────
