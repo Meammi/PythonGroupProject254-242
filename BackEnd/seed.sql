@@ -63,13 +63,26 @@ VALUES
     (7, 1, 2, 1, 'Toilet 7', 14.068599, 100.603391, 'No description', true),
     (8, 1, 2, 1, 'Toilet 8', 14.068812, 100.602860, 'No description', true);
 
+    -- Floor 3 Toilets
+    (9, 1, 3, 1, 'Toilet 9', 14.069806, 100.603862, 'No description', true),
+    (10, 1, 3, 1, 'Toilet 10', 14.069322, 100.604066, 'No description', true),
+    (11, 1, 3, 1, 'Toilet 11', 14.068599, 100.603391, 'No description', true),
+    (12, 1, 3, 1, 'Toilet 12', 14.068812, 100.602860, 'No description', true);
+
+    -- Floor 4 Toilets
+    (13, 1, 4, 1, 'Toilet 13', 14.069806, 100.603862, 'No description', true),
+    (14, 1, 4, 1, 'Toilet 14', 14.069322, 100.604066, 'No description', true),
+    (15, 1, 4, 1, 'Toilet 15', 14.068599, 100.603391, 'No description', true),
+    (16, 1, 4, 1, 'Toilet 16', 14.068812, 100.602860, 'No description', true);
+
+
 -- ── 4b. Stores (type_id = 2) ────────────────────────────────────────────────
 INSERT INTO facilities (id, building_id, floor_id, facility_type_id, name, latitude, longitude, description, is_active)
 VALUES
-    (9, 1, 1, 2, 'Friend Coffee (Yellow Store)', 14.069161, 100.602763, 
+    (17, 1, 1, 2, 'Friend Coffee (Yellow Store)', 14.069161, 100.602763, 
      'Favorite store for food and coffee for TU students.', true),
 
-    (10, 1, 1, 2, 'Fresh Me', 14.069166, 14.069166, 
+    (18, 1, 1, 2, 'Fresh Me', 14.069166, 14.069166, 
      'Refreshing Thai-style bubble tea and signature beverages.', true),
 
     (11, 1, 1, 2, 'Frosty Box', 14.069062, 100.603868, 
